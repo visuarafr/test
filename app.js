@@ -33,16 +33,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 } else {
                     console.log("No such document!");
                 }
-
-                // Supprimer temporairement toutes les redirections
-                console.log('Skipping redirection');
             } catch (error) {
                 console.error("Error getting document:", error);
             }
         } else {
             console.log('No user is signed in', window.location.pathname);
-            // Supprimer temporairement toutes les redirections
-            console.log('Skipping redirection');
         }
     });
 });
@@ -54,8 +49,6 @@ window.login = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
             console.log("User logged in");
-            // Supprimer temporairement les redirections
-            console.log('Login successful, no redirection');
         })
         .catch(error => {
             console.error("Login error:", error);
