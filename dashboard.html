@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Make a Photo Request</h1>
+        <form id="request-form">
+            <label for="shootingType">Type de Shooting</label>
+            <select id="shootingType">
+                <option value="photo">Photo</option>
+                <option value="video">Vidéo</option>
+                <option value="photo-video">Photo + Vidéo</option>
+            </select>
+            <label for="date">Date</label>
+            <input type="date" id="date">
+            <label for="address">Adresse</label>
+            <input type="text" id="address">
+            <label for="city">Ville</label>
+            <input type="text" id="city">
+            <label for="region">Région</label>
+            <input type="text" id="region">
+            <label for="additionalInfo">Informations supplémentaires</label>
+            <textarea id="additionalInfo"></textarea>
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
