@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getFirestore, setDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -35,6 +35,13 @@ window.adminLogin = function() {
         });
 }
 
+// Function to check if the user has admin privileges
+async function checkAdminPermissions(user) {
+    const docRef = doc(db, "admins", user.uid);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists();
+}
+
 // Signup function for creating new user accounts by admin
 window.signup = async function() {
     console.log("Signup function called");
@@ -49,21 +56,21 @@ window.signup = async function() {
     };
     
     try {
-        // Création de l'utilisateur
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        console.log("User created with ID:", user.uid);
+        const user = auth.currentUser;
+        if (user && await checkAdminPermissions(user)) {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const newUser = userCredential.user;
+            console.log("User created with ID:", newUser.uid);
 
-        // Journalisation pour le débogage
-        console.log("Attempting to create Firestore document with ID:", user.uid);
+            console.log("Attempting to create Firestore document with ID:", newUser.uid);
+            const docRef = doc(db, "clients", newUser.uid);
+            await setDoc(docRef, clientData);
+            console.log("Document successfully written!");
 
-        // Création du document Firestore
-        const docRef = doc(db, "clients", user.uid);
-        await setDoc(docRef, clientData);
-        console.log("Document successfully written!");
-
-        // Informer l'admin que l'utilisateur a été créé
-        alert('User account created successfully.');
+            alert('User account created successfully.');
+        } else {
+            alert('You do not have admin permissions.');
+        }
     } catch (error) {
         console.error("Error creating new user:", error);
         if (error.code === 'auth/email-already-in-use') {
