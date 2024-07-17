@@ -15,10 +15,17 @@
             <input type="text" id="signup-company" placeholder="Company Name">
             <select id="client-type" onchange="toggleSubscriptionOptions()">
                 <option value="prestations">Prestations</option>
+                <option value="prestations_plus">Prestations Plus</option>
                 <option value="abonnements">Abonnements</option>
+                <option value="abonnements_plus">Abonnements Plus</option>
             </select>
             <div id="subscription-options" style="display: none;">
-                <input type="text" id="signup-subscription" placeholder="Subscription Type">
+                <select id="signup-subscription">
+                    <option value="demarrage">Démarrage</option>
+                    <option value="standard">Standard</option>
+                    <option value="premium">Premium</option>
+                    <option value="entreprise">Entreprise</option>
+                </select>
             </div>
             <button onclick="signup()">Create Account</button>
         </div>
@@ -28,7 +35,7 @@
         function toggleSubscriptionOptions() {
             const clientType = document.getElementById('client-type').value;
             const subscriptionOptions = document.getElementById('subscription-options');
-            if (clientType === 'abonnements') {
+            if (clientType === 'abonnements' || clientType === 'abonnements_plus') {
                 subscriptionOptions.style.display = 'block';
             } else {
                 subscriptionOptions.style.display = 'none';
