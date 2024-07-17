@@ -26,7 +26,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if (user) {
             console.log('User is signed in', window.location.pathname);
             try {
-                const docRef = doc(db, "clients", user.uid);
+                const userId = user.uid;
+                console.log("Authenticated user ID:", userId);
+
+                const docRef = doc(db, "clients", userId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
