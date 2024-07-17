@@ -14,6 +14,22 @@
             <input type="password" id="password" placeholder="Password">
             <button onclick="login()">Login</button>
         </div>
+        <h1>Admin Login</h1>
+        <div id="admin-login-form">
+            <input type="email" id="admin-email" placeholder="Admin Email">
+            <input type="password" id="admin-password" placeholder="Admin Password">
+            <button onclick="adminLogin()">Admin Login</button>
+        </div>
+        <div id="admin-section" style="display:none;">
+            <h1>Create New User Account</h1>
+            <div id="signup-form">
+                <input type="email" id="signup-email" placeholder="Email">
+                <input type="password" id="signup-password" placeholder="Password">
+                <input type="text" id="signup-company" placeholder="Company Name">
+                <input type="text" id="signup-subscription" placeholder="Subscription Type">
+                <button onclick="signup()">Create Account</button>
+            </div>
+        </div>
     </div>
     <script type="module" src="/test/app.js"></script>
 </body>
