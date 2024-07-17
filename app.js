@@ -20,15 +20,21 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    document.getElementById('request-form')?.addEventListener('submit', submitRequest);
+    const requestForm = document.getElementById('request-form');
+    if (requestForm) {
+        requestForm.addEventListener('submit', submitRequest);
+    }
 
     onAuthStateChanged(auth, user => {
         if (user) {
             // User is signed in
             console.log('User is signed in');
+            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
+                window.location = 'selection.html';
+            }
         } else {
             // No user is signed in
-            if (window.location.pathname !== '/index.html') {
+            if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
                 window.location = 'index.html';
             }
         }
