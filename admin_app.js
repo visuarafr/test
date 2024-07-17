@@ -47,12 +47,13 @@ window.signup = async function() {
     console.log("Signup function called");
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
+    const clientType = document.getElementById('client-type').value;
     const clientData = {
-        clientType: "abonnements",
+        clientType: clientType,
         companyName: document.getElementById('signup-company').value,
         email: email,
-        photoCredits: 300,
-        subscriptionType: document.getElementById('signup-subscription').value
+        photoCredits: clientType === "abonnements" ? 300 : 0,
+        subscriptionType: clientType === "abonnements" ? document.getElementById('signup-subscription').value : ""
     };
     
     try {
