@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         } else {
             console.log('No user is signed in', window.location.pathname);
-            if (!window.location.pathname.endsWith('/test/index.html') && window.location.pathname !== '/test/' && !window.location.pathname.endsWith('/test/admin_login.html')) {
+            if (window.location.pathname.endsWith('/test/dashboard.html') || window.location.pathname.endsWith('/test/selection.html')) {
                 window.location.replace('/test/index.html');
             }
         }
