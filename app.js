@@ -20,7 +20,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', (event) => {
+    console.log("DOMContentLoaded event fired");
     onAuthStateChanged(auth, async (user) => {
+        console.log("onAuthStateChanged event fired");
         if (user) {
             console.log('User is signed in', window.location.pathname);
             try {
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
                 if (docSnap.exists()) {
                     const clientData = docSnap.data();
+                    console.log("Client data:", clientData);
                     document.getElementById('credits-count').innerText = clientData.photoCredits;
                 } else {
                     console.log("No such document!");
@@ -44,6 +47,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 // Login function
 window.login = function() {
+    console.log("Login function called");
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
