@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My JavaScript App</title>
+    <title>Login</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <script src="script.js"></script>
+    <div class="container">
+        <h1>Login</h1>
+        <div id="login-form">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <button onclick="signup()">Sign Up</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
