@@ -12,8 +12,27 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth;
+let db;
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    auth = firebase.auth();
+    db = firebase.firestore();
+
+    document.getElementById('request-form').addEventListener('submit', submitRequest);
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is signed in
+            console.log('User is signed in');
+        } else {
+            // No user is signed in
+            if (window.location.pathname !== '/index.html') {
+                window.location = 'index.html';
+            }
+        }
+    });
+});
 
 // Login function
 function login() {
@@ -41,22 +60,7 @@ function signup() {
         });
 }
 
-// Redirect to login if not authenticated
-auth.onAuthStateChanged(user => {
-    if (user) {
-        // User is signed in
-        console.log('User is signed in');
-    } else {
-        // No user is signed in
-        if (window.location.pathname !== '/index.html') {
-            window.location = 'index.html';
-        }
-    }
-});
-
 // Function to submit request
-document.getElementById('request-form').addEventListener('submit', submitRequest);
-
 function submitRequest(e) {
     e.preventDefault();
 
