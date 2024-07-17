@@ -57,10 +57,12 @@ document.getElementById('create-account-form')?.addEventListener('submit', funct
     const clientType = document.getElementById('clientType').value;
     const subscriptionType = clientType === 'abonnements' ? document.getElementById('subscriptionType').value : null;
 
-    createUserWithEmailAndPassword(auth, clientEmail, "temporaryPassword123") // Use a temporary password
+    // Create the user with a temporary password
+    createUserWithEmailAndPassword(auth, clientEmail, "temporaryPassword123")
         .then(userCredential => {
             const user = userCredential.user;
 
+            // Add client details to Firestore
             addDoc(collection(db, 'clients'), {
                 email: clientEmail,
                 companyName,
@@ -69,6 +71,8 @@ document.getElementById('create-account-form')?.addEventListener('submit', funct
                 photoCredits: subscriptionType ? getPhotoCredits(subscriptionType) : null
             }).then(() => {
                 alert('Compte client créé avec succès !');
+
+                // Send password reset email
                 sendPasswordResetEmail(auth, clientEmail)
                     .then(() => {
                         alert('Un email a été envoyé au client pour définir son mot de passe.');
