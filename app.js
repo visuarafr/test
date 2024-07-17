@@ -10,7 +10,8 @@ var firebaseConfig = {
     projectId: "demande-shooting",
     storageBucket: "demande-shooting.appspot.com",
     messagingSenderId: "445564757883",
-    appId: "1:445564757883:web:605f43b554324a6e483fde"
+    appId: "1:445564757883:web:605f43b554324a6e483fde",
+    measurementId: "G-RCRMBS7X79"
 };
 
 // Initialize Firebase
