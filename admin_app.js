@@ -19,27 +19,42 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Function to check if the user has admin privileges
+async function checkAdminPermissions(user) {
+    const docRef = doc(db, "admins", user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return true;
+    } else {
+        // Ajout de l'utilisateur en tant qu'admin s'il n'existe pas déjà
+        if (user.email === "yannmartial@visuara.fr") {
+            await setDoc(docRef, { email: user.email });
+            return true;
+        }
+        return false;
+    }
+}
+
 // Admin Login function
 window.adminLogin = function() {
     console.log("Admin login function called");
     const email = document.getElementById('admin-email').value;
     const password = document.getElementById('admin-password').value;
     signInWithEmailAndPassword(auth, email, password)
-        .then(user => {
-            console.log("Admin logged in");
-            window.location.replace('create_account.html');
+        .then(async userCredential => {
+            const user = userCredential.user;
+            if (await checkAdminPermissions(user)) {
+                console.log("Admin logged in");
+                window.location.replace('create_account.html');
+            } else {
+                console.error("You do not have admin permissions.");
+                alert("You do not have admin permissions.");
+            }
         })
         .catch(error => {
             console.error("Admin login error:", error);
             alert(error.message);
         });
-}
-
-// Function to check if the user has admin privileges
-async function checkAdminPermissions(user) {
-    const docRef = doc(db, "admins", user.uid);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists();
 }
 
 // Signup function for creating new user accounts by admin
