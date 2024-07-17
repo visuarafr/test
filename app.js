@@ -34,19 +34,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     console.log("No such document!");
                 }
 
-                // Redirection conditionnelle
-                if (window.location.pathname === '/test/index.html' || window.location.pathname === '/test/') {
-                    window.location.replace('/test/selection.html');
-                }
+                // Supprimer temporairement toutes les redirections
+                console.log('Skipping redirection');
             } catch (error) {
                 console.error("Error getting document:", error);
             }
         } else {
             console.log('No user is signed in', window.location.pathname);
-            // Redirection conditionnelle
-            if (window.location.pathname === '/test/dashboard.html' || window.location.pathname === '/test/selection.html') {
-                window.location.replace('/test/index.html');
-            }
+            // Supprimer temporairement toutes les redirections
+            console.log('Skipping redirection');
         }
     });
 });
@@ -58,7 +54,8 @@ window.login = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
             console.log("User logged in");
-            window.location.replace('/test/selection.html');
+            // Supprimer temporairement les redirections
+            console.log('Login successful, no redirection');
         })
         .catch(error => {
             console.error("Login error:", error);
