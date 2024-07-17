@@ -48,12 +48,51 @@ window.signup = async function() {
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     const clientType = document.getElementById('client-type').value;
+    let photoCredits = 0;
+    let videoCredits = "";
+
+    switch (clientType) {
+        case 'prestations':
+            photoCredits = 0; // Pas de crédits photo fixes pour les prestations
+            break;
+        case 'prestations_plus':
+            videoCredits = "1 vidéo par shooting"; // Vidéo par shooting pour prestations plus
+            break;
+        case 'abonnements':
+            const subscriptionType = document.getElementById('signup-subscription').value;
+            if (subscriptionType === 'demarrage') photoCredits = 60;
+            if (subscriptionType === 'standard') photoCredits = 100;
+            if (subscriptionType === 'premium') photoCredits = 180;
+            if (subscriptionType === 'entreprise') photoCredits = 300;
+            break;
+        case 'abonnements_plus':
+            const subscriptionPlusType = document.getElementById('signup-subscription').value;
+            if (subscriptionPlusType === 'demarrage') {
+                photoCredits = 60;
+                videoCredits = "1 vidéo de 45 sec par shooting";
+            }
+            if (subscriptionPlusType === 'standard') {
+                photoCredits = 100;
+                videoCredits = "1 vidéo de 1 min par shooting";
+            }
+            if (subscriptionPlusType === 'premium') {
+                photoCredits = 180;
+                videoCredits = "1 vidéo de 1 min 30 sec par shooting";
+            }
+            if (subscriptionPlusType === 'entreprise') {
+                photoCredits = 300;
+                videoCredits = "1 vidéo de 2 min par shooting";
+            }
+            break;
+    }
+
     const clientData = {
         clientType: clientType,
         companyName: document.getElementById('signup-company').value,
         email: email,
-        photoCredits: clientType === "abonnements" ? 300 : 0,
-        subscriptionType: clientType === "abonnements" ? document.getElementById('signup-subscription').value : ""
+        photoCredits: photoCredits,
+        videoCredits: videoCredits,
+        subscriptionType: clientType.includes("abonnements") ? document.getElementById('signup-subscription').value : ""
     };
     
     try {
