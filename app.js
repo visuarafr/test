@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -19,28 +19,33 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    const requestForm = document.getElementById('request-form');
-    if (requestForm) {
-        requestForm.addEventListener('submit', submitRequest);
-    }
+document.addEventListener('DOMContentLoaded', async (event) => {
+    const user = auth.currentUser;
+    if (user) {
+        const docRef = doc(db, "clients", user.uid);
+        const docSnap = await getDoc(docRef);
 
-    onAuthStateChanged(auth, user => {
-        console.log('onAuthStateChanged called');
-        if (user) {
-            // User is signed in
-            console.log('User is signed in', window.location.pathname);
-            if (window.location.pathname.endsWith('/test/index.html') || window.location.pathname === '/test/') {
-                window.location.replace('/test/selection.html');
-            }
+        if (docSnap.exists()) {
+            const clientData = docSnap.data();
+            document.getElementById('credits-count').innerText = clientData.photoCredits;
         } else {
-            // No user is signed in
-            console.log('No user is signed in', window.location.pathname);
-            if (!window.location.pathname.endsWith('/test/index.html') && window.location.pathname !== '/test/' && !window.location.pathname.endsWith('/test/admin_login.html')) {
-                window.location.replace('/test/index.html');
-            }
+            console.log("No such document!");
         }
-    });
+    }
+});
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        // User is signed in
+        if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
+            window.location.replace('/selection.html');
+        }
+    } else {
+        // No user is signed in
+        if (!window.location.pathname.endsWith('/index.html') && window.location.pathname !== '/' && !window.location.pathname.endsWith('/admin_login.html')) {
+            window.location.replace('/index.html');
+        }
+    }
 });
 
 // Login function
@@ -49,7 +54,7 @@ window.login = function() {
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location.replace('/test/selection.html');
+            window.location.replace('/selection.html');
         })
         .catch(error => {
             alert(error.message);
@@ -62,7 +67,7 @@ window.signup = function() {
     const password = document.getElementById('password').value;
     createUserWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location.replace('/test/selection.html');
+            window.location.replace('/selection.html');
         })
         .catch(error => {
             alert(error.message);
@@ -70,31 +75,70 @@ window.signup = function() {
 }
 
 // Function to submit request
-function submitRequest(e) {
+async function submitRequest(e) {
     e.preventDefault();
 
-    const shootingType = document.getElementById('shootingType').value;
-    const specificShooting = document.getElementById('specificShooting').value;
-    const date = document.getElementById('date').value;
-    const address = document.getElementById('address').value;
-    const city = document.getElementById('city').value;
-    const additionalInfo = document.getElementById('additionalInfo').value;
+    const user = auth.currentUser;
+    const docRef = doc(db, "clients", user.uid);
+    const docSnap = await getDoc(docRef);
 
-    addDoc(collection(db, 'requests'), {
-        shootingType,
-        specificShooting,
-        date,
-        address,
-        city,
-        additionalInfo,
-        userId: auth.currentUser.uid,
-        createdAt: serverTimestamp()
-    }).then(() => {
-        alert('Request submitted!');
-        sendToTrello({ shootingType, specificShooting, date, address, city, additionalInfo });
-    }).catch(error => {
-        console.error('Error adding document: ', error);
-    });
+    if (docSnap.exists()) {
+        const clientData = docSnap.data();
+        const creditsRemaining = clientData.photoCredits;
+
+        const shootingType = document.getElementById('shootingType').value;
+        const specificShooting = document.getElementById('specificShooting').value;
+        const date = document.getElementById('date').value;
+        const address = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const additionalInfo = document.getElementById('additionalInfo').value;
+
+        let creditsUsed = 0;
+        switch (specificShooting) {
+            case 'Signature':
+                creditsUsed = 12;
+                break;
+            case 'Héritage':
+                creditsUsed = 20;
+                break;
+            case 'Excellence':
+                creditsUsed = 30;
+                break;
+            case 'Prestige':
+                creditsUsed = 40;
+                break;
+            case 'Démarrage':
+                creditsUsed = 60;
+                break;
+            // Ajoutez les autres options ici
+        }
+
+        if (creditsRemaining >= creditsUsed) {
+            await addDoc(collection(db, 'requests'), {
+                shootingType,
+                specificShooting,
+                date,
+                address,
+                city,
+                additionalInfo,
+                userId: user.uid,
+                createdAt: serverTimestamp()
+            });
+
+            await updateDoc(docRef, {
+                photoCredits: creditsRemaining - creditsUsed
+            });
+
+            document.getElementById('credits-count').innerText = creditsRemaining - creditsUsed;
+
+            alert('Request submitted!');
+            sendToTrello({ shootingType, specificShooting, date, address, city, additionalInfo });
+        } else {
+            alert('Not enough photo credits');
+        }
+    } else {
+        console.log("No such document!");
+    }
 }
 
 // Function to send request to Trello
