@@ -1,4 +1,7 @@
-// app.js
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -9,19 +12,16 @@ var firebaseConfig = {
     messagingSenderId: "445564757883",
     appId: "1:445564757883:web:605f43b55432a46e6483fde"
 };
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
 
-let auth;
-let db;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    auth = firebase.auth();
-    db = firebase.firestore();
-
     document.getElementById('request-form').addEventListener('submit', submitRequest);
 
-    auth.onAuthStateChanged(user => {
+    onAuthStateChanged(auth, user => {
         if (user) {
             // User is signed in
             console.log('User is signed in');
@@ -35,10 +35,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 // Login function
-function login() {
+window.login = function() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    auth.signInWithEmailAndPassword(email, password)
+    signInWithEmailAndPassword(auth, email, password)
         .then(user => {
             window.location = 'dashboard.html';
         })
@@ -48,10 +48,10 @@ function login() {
 }
 
 // Signup function
-function signup() {
+window.signup = function() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    auth.createUserWithEmailAndPassword(email, password)
+    createUserWithEmailAndPassword(auth, email, password)
         .then(user => {
             window.location = 'dashboard.html';
         })
@@ -71,7 +71,7 @@ function submitRequest(e) {
     const region = document.getElementById('region').value;
     const additionalInfo = document.getElementById('additionalInfo').value;
 
-    db.collection('requests').add({
+    addDoc(collection(db, 'requests'), {
         shootingType,
         date,
         address,
@@ -79,7 +79,7 @@ function submitRequest(e) {
         region,
         additionalInfo,
         userId: auth.currentUser.uid,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: serverTimestamp()
     }).then(() => {
         alert('Request submitted!');
         sendToTrello({ shootingType, date, address, city, region, additionalInfo });
