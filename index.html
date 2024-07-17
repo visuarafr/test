@@ -8,12 +8,14 @@
 </head>
 <body>
     <div class="container">
+        <div class="header">
+            <button onclick="location.href='admin_login.html'" class="admin-button">Admin</button>
+        </div>
         <h1>Login</h1>
         <div id="login-form">
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Password">
             <button onclick="login()">Login</button>
-            <button onclick="signup()">Sign Up</button>
         </div>
     </div>
     <script type="module" src="app.js"></script>
