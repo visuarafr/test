@@ -22,23 +22,25 @@ const db = getFirestore(app);
 document.addEventListener('DOMContentLoaded', (event) => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // User is signed in
             console.log('User is signed in', window.location.pathname);
-            const docRef = doc(db, "clients", user.uid);
-            const docSnap = await getDoc(docRef);
+            try {
+                const docRef = doc(db, "clients", user.uid);
+                const docSnap = await getDoc(docRef);
 
-            if (docSnap.exists()) {
-                const clientData = docSnap.data();
-                document.getElementById('credits-count').innerText = clientData.photoCredits;
-            } else {
-                console.log("No such document!");
-            }
-            
-            if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
-                window.location.replace('/selection.html');
+                if (docSnap.exists()) {
+                    const clientData = docSnap.data();
+                    document.getElementById('credits-count').innerText = clientData.photoCredits;
+                } else {
+                    console.log("No such document!");
+                }
+
+                if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
+                    window.location.replace('/selection.html');
+                }
+            } catch (error) {
+                console.error("Error getting document:", error);
             }
         } else {
-            // No user is signed in
             console.log('No user is signed in', window.location.pathname);
             if (!window.location.pathname.endsWith('/index.html') && window.location.pathname !== '/' && !window.location.pathname.endsWith('/admin_login.html')) {
                 window.location.replace('/index.html');
@@ -56,6 +58,7 @@ window.login = function() {
             window.location.replace('/selection.html');
         })
         .catch(error => {
+            console.error("Login error:", error);
             alert(error.message);
         });
 }
@@ -69,6 +72,7 @@ window.signup = function() {
             window.location.replace('/selection.html');
         })
         .catch(error => {
+            console.error("Signup error:", error);
             alert(error.message);
         });
 }
@@ -78,65 +82,69 @@ async function submitRequest(e) {
     e.preventDefault();
 
     const user = auth.currentUser;
-    const docRef = doc(db, "clients", user.uid);
-    const docSnap = await getDoc(docRef);
+    try {
+        const docRef = doc(db, "clients", user.uid);
+        const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-        const clientData = docSnap.data();
-        const creditsRemaining = clientData.photoCredits;
+        if (docSnap.exists()) {
+            const clientData = docSnap.data();
+            const creditsRemaining = clientData.photoCredits;
 
-        const shootingType = document.getElementById('shootingType').value;
-        const specificShooting = document.getElementById('specificShooting').value;
-        const date = document.getElementById('date').value;
-        const address = document.getElementById('address').value;
-        const city = document.getElementById('city').value;
-        const additionalInfo = document.getElementById('additionalInfo').value;
+            const shootingType = document.getElementById('shootingType').value;
+            const specificShooting = document.getElementById('specificShooting').value;
+            const date = document.getElementById('date').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const additionalInfo = document.getElementById('additionalInfo').value;
 
-        let creditsUsed = 0;
-        switch (specificShooting) {
-            case 'Signature':
-                creditsUsed = 12;
-                break;
-            case 'Héritage':
-                creditsUsed = 20;
-                break;
-            case 'Excellence':
-                creditsUsed = 30;
-                break;
-            case 'Prestige':
-                creditsUsed = 40;
-                break;
-            case 'Démarrage':
-                creditsUsed = 60;
-                break;
-            // Ajoutez les autres options ici
-        }
+            let creditsUsed = 0;
+            switch (specificShooting) {
+                case 'Signature':
+                    creditsUsed = 12;
+                    break;
+                case 'Héritage':
+                    creditsUsed = 20;
+                    break;
+                case 'Excellence':
+                    creditsUsed = 30;
+                    break;
+                case 'Prestige':
+                    creditsUsed = 40;
+                    break;
+                case 'Démarrage':
+                    creditsUsed = 60;
+                    break;
+                // Ajoutez les autres options ici
+            }
 
-        if (creditsRemaining >= creditsUsed) {
-            await addDoc(collection(db, 'requests'), {
-                shootingType,
-                specificShooting,
-                date,
-                address,
-                city,
-                additionalInfo,
-                userId: user.uid,
-                createdAt: serverTimestamp()
-            });
+            if (creditsRemaining >= creditsUsed) {
+                await addDoc(collection(db, 'requests'), {
+                    shootingType,
+                    specificShooting,
+                    date,
+                    address,
+                    city,
+                    additionalInfo,
+                    userId: user.uid,
+                    createdAt: serverTimestamp()
+                });
 
-            await updateDoc(docRef, {
-                photoCredits: creditsRemaining - creditsUsed
-            });
+                await updateDoc(docRef, {
+                    photoCredits: creditsRemaining - creditsUsed
+                });
 
-            document.getElementById('credits-count').innerText = creditsRemaining - creditsUsed;
+                document.getElementById('credits-count').innerText = creditsRemaining - creditsUsed;
 
-            alert('Request submitted!');
-            sendToTrello({ shootingType, specificShooting, date, address, city, additionalInfo });
+                alert('Request submitted!');
+                sendToTrello({ shootingType, specificShooting, date, address, city, additionalInfo });
+            } else {
+                alert('Not enough photo credits');
+            }
         } else {
-            alert('Not enough photo credits');
+            console.log("No such document!");
         }
-    } else {
-        console.log("No such document!");
+    } catch (error) {
+        console.error("Error submitting request:", error);
     }
 }
 
