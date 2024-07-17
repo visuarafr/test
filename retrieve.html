@@ -12,11 +12,13 @@
         <div id="photos-container">
             <!-- Les photos récupérées seront affichées ici -->
         </div>
+        <button onclick="logout()">Logout</button>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
         var firebaseConfig = {
             apiKey: "AIzaSyBKjWfl5lMhM1cftbrPK2ZbkaBOxqYGp7Y",
@@ -31,12 +33,22 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
-        document.addEventListener('DOMContentLoaded', async (event) => {
-            const user = auth.currentUser;
+        function logout() {
+            signOut(auth).then(() => {
+                window.location.replace('index.html');
+            }).catch((error) => {
+                console.error("Error signing out: ", error);
+            });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const querySnapshot = await getDocs(collection(db, "requests"));
                 const photosContainer = document.getElementById('photos-container');
+                photosContainer.innerHTML = ''; // Clear previous content
+                const q = query(collection(db, "requests"), where("userId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const photoDiv = document.createElement('div');
@@ -46,21 +58,40 @@
                         <p>Date: ${data.date}</p>
                         <p>Address: ${data.address}</p>
                         <p>City: ${data.city}</p>
-                        <p>Region: ${data.region}</p>
                         <p>Additional Info: ${data.additionalInfo}</p>
+                        <button onclick="viewShooting('${doc.id}')">View Photos/Videos</button>
                     `;
                     photosContainer.appendChild(photoDiv);
                 });
             } else {
-                window.location = 'index.html';
+                window.location.replace('index.html');
             }
         });
 
-        onAuthStateChanged(auth, user => {
-            if (!user) {
-                window.location = 'index.html';
-            }
-        });
+        window.viewShooting = async function(shootingId) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
+            const listRef = await listAll(storageRef);
+
+            const photosContainer = document.getElementById('photos-container');
+            photosContainer.innerHTML = ''; // Clear previous content
+
+            listRef.items.forEach(async (itemRef) => {
+                const url = await getDownloadURL(itemRef);
+                const mediaElement = document.createElement('div');
+                mediaElement.classList.add('media');
+
+                if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
+                    mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}">`;
+                } else if (itemRef.name.endsWith('.mp4')) {
+                    mediaElement.innerHTML = `<video controls src="${url}"></video>`;
+                }
+
+                photosContainer.appendChild(mediaElement);
+            });
+        }
     </script>
 </body>
 </html>
