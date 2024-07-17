@@ -29,13 +29,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const userId = user.uid;
                 console.log("Authenticated user ID:", userId);
 
+                // Vérifiez si le document existe réellement
                 const docRef = doc(db, "clients", userId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const clientData = docSnap.data();
                     console.log("Client data:", clientData);
-                    document.getElementById('credits-count').innerText = clientData.photoCredits;
+                    if (document.getElementById('credits-count')) {
+                        document.getElementById('credits-count').innerText = clientData.photoCredits;
+                    }
 
                     // Redirection conditionnelle uniquement si sur la page d'accueil
                     if (window.location.pathname.endsWith('/test/index.html') || window.location.pathname === '/test/') {
@@ -43,7 +46,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     }
                 } else {
                     console.log("No such document!");
-                    // Pas de redirection si aucun document utilisateur trouvé
+                    // Affichez un message à l'utilisateur si aucun document utilisateur trouvé
+                    alert('No user data found. Please contact support.');
                 }
             } catch (error) {
                 console.error("Error getting document:", error);
