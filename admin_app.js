@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { getFirestore, setDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -122,7 +122,11 @@ window.signup = async function() {
             await setDoc(docRef, clientData);
             console.log("Document successfully written!");
 
-            alert('User account created successfully.');
+            // Envoyer un email de réinitialisation de mot de passe
+            await sendPasswordResetEmail(auth, email);
+            console.log("Password reset email sent");
+
+            alert('User account created successfully. A password reset email has been sent to the user.');
         } else {
             alert('You do not have admin permissions.');
         }
