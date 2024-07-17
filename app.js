@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -34,16 +34,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     console.log("No such document!");
                 }
 
-                if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
-                    window.location.replace('/selection.html');
+                if (window.location.pathname.endsWith('/test/index.html') || window.location.pathname === '/test/') {
+                    window.location.replace('/test/selection.html');
                 }
             } catch (error) {
                 console.error("Error getting document:", error);
             }
         } else {
             console.log('No user is signed in', window.location.pathname);
-            if (!window.location.pathname.endsWith('/index.html') && window.location.pathname !== '/' && !window.location.pathname.endsWith('/admin_login.html')) {
-                window.location.replace('/index.html');
+            if (!window.location.pathname.endsWith('/test/index.html') && window.location.pathname !== '/test/' && !window.location.pathname.endsWith('/test/admin_login.html')) {
+                window.location.replace('/test/index.html');
             }
         }
     });
@@ -55,108 +55,10 @@ window.login = function() {
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location.replace('/selection.html');
+            window.location.replace('/test/selection.html');
         })
         .catch(error => {
             console.error("Login error:", error);
             alert(error.message);
         });
-}
-
-// Signup function
-window.signup = function() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    createUserWithEmailAndPassword(auth, email, password)
-        .then(user => {
-            window.location.replace('/selection.html');
-        })
-        .catch(error => {
-            console.error("Signup error:", error);
-            alert(error.message);
-        });
-}
-
-// Function to submit request
-async function submitRequest(e) {
-    e.preventDefault();
-
-    const user = auth.currentUser;
-    try {
-        const docRef = doc(db, "clients", user.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const clientData = docSnap.data();
-            const creditsRemaining = clientData.photoCredits;
-
-            const shootingType = document.getElementById('shootingType').value;
-            const specificShooting = document.getElementById('specificShooting').value;
-            const date = document.getElementById('date').value;
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const additionalInfo = document.getElementById('additionalInfo').value;
-
-            let creditsUsed = 0;
-            switch (specificShooting) {
-                case 'Signature':
-                    creditsUsed = 12;
-                    break;
-                case 'Héritage':
-                    creditsUsed = 20;
-                    break;
-                case 'Excellence':
-                    creditsUsed = 30;
-                    break;
-                case 'Prestige':
-                    creditsUsed = 40;
-                    break;
-                case 'Démarrage':
-                    creditsUsed = 60;
-                    break;
-                // Ajoutez les autres options ici
-            }
-
-            if (creditsRemaining >= creditsUsed) {
-                await addDoc(collection(db, 'requests'), {
-                    shootingType,
-                    specificShooting,
-                    date,
-                    address,
-                    city,
-                    additionalInfo,
-                    userId: user.uid,
-                    createdAt: serverTimestamp()
-                });
-
-                await updateDoc(docRef, {
-                    photoCredits: creditsRemaining - creditsUsed
-                });
-
-                document.getElementById('credits-count').innerText = creditsRemaining - creditsUsed;
-
-                alert('Request submitted!');
-                sendToTrello({ shootingType, specificShooting, date, address, city, additionalInfo });
-            } else {
-                alert('Not enough photo credits');
-            }
-        } else {
-            console.log("No such document!");
-        }
-    } catch (error) {
-        console.error("Error submitting request:", error);
-    }
-}
-
-// Function to send request to Trello
-function sendToTrello(request) {
-    const trelloKey = 'be54e3f7ff2c69550f1ac28b202b7458';
-    const trelloToken = 'ATTAc64ad16d6a5dfa2af0d106b42cb1c9ffad6f80ac4c1e3fce4bb03801473eff247EDCE65C';
-    const listId = '6650d37d314c2a17bbcf7090'; 
-
-    fetch(`https://api.trello.com/1/cards?key=${trelloKey}&token=${trelloToken}&idList=${listId}&name=${encodeURIComponent('New Request')}&desc=${encodeURIComponent(`Type: ${request.shootingType}\nDate: ${request.date}\nAddress: ${request.address}\nCity: ${request.city}\nAdditional Info: ${request.additionalInfo}`)}`, {
-        method: 'POST'
-    }).then(response => response.json())
-      .then(data => console.log('Trello card created:', data))
-      .catch(error => console.error('Error creating Trello card:', error));
 }
