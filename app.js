@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if (user) {
             // User is signed in
             console.log('User is signed in');
-            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
+            if (window.location.pathname === '/index.html' || window.location.pathname === '/' || window.location.pathname === '/admin_login.html') {
                 window.location = 'selection.html';
             }
         } else {
             // No user is signed in
-            if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
+            if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/admin_login.html') {
                 window.location = 'index.html';
             }
         }
