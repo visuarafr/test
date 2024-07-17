@@ -128,12 +128,6 @@ window.signup = async function() {
         }
     } catch (error) {
         console.error("Error creating new user:", error);
-        if (error.code === 'auth/email-already-in-use') {
-            alert('This email is already in use. Please use a different email.');
-        } else if (error.code === 'permission-denied') {
-            alert('You do not have permission to perform this action.');
-        } else {
-            alert('Error creating new user: ' + error.message);
-        }
+        alert('Error creating new user: ' + error.message);
     }
 }
