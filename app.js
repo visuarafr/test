@@ -29,13 +29,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if (user) {
             // User is signed in
             console.log('User is signed in');
-            if (window.location.pathname === '/index.html' || window.location.pathname === '/' || window.location.pathname === '/admin_login.html') {
-                window.location = 'selection.html';
+            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
+                window.location.replace('selection.html');
             }
         } else {
             // No user is signed in
             if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/admin_login.html') {
-                window.location = 'index.html';
+                window.location.replace('index.html');
             }
         }
     });
@@ -47,7 +47,7 @@ window.login = function() {
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location = 'selection.html';
+            window.location.replace('selection.html');
         })
         .catch(error => {
             alert(error.message);
@@ -60,7 +60,7 @@ window.signup = function() {
     const password = document.getElementById('password').value;
     createUserWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location = 'selection.html';
+            window.location.replace('selection.html');
         })
         .catch(error => {
             alert(error.message);
