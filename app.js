@@ -20,7 +20,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    document.getElementById('request-form').addEventListener('submit', submitRequest);
+    document.getElementById('request-form')?.addEventListener('submit', submitRequest);
 
     onAuthStateChanged(auth, user => {
         if (user) {
@@ -41,7 +41,7 @@ window.login = function() {
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location = 'dashboard.html';
+            window.location = 'selection.html';
         })
         .catch(error => {
             alert(error.message);
@@ -54,7 +54,7 @@ window.signup = function() {
     const password = document.getElementById('password').value;
     createUserWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location = 'dashboard.html';
+            window.location = 'selection.html';
         })
         .catch(error => {
             alert(error.message);
