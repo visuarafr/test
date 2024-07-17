@@ -3,34 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un Compte Client</title>
+    <title>Create Account</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Créer un Compte Client</h1>
-        <form id="create-account-form">
-            <label for="clientEmail">Email du client</label>
-            <input type="email" id="clientEmail" required>
-            <label for="companyName">Nom de l'entreprise</label>
-            <input type="text" id="companyName" required>
-            <label for="clientType">Type de Client</label>
-            <select id="clientType" onchange="toggleSubscriptionOptions()">
+        <h1>Create New User Account</h1>
+        <div id="signup-form">
+            <input type="email" id="signup-email" placeholder="Email">
+            <input type="password" id="signup-password" placeholder="Password">
+            <input type="text" id="signup-company" placeholder="Company Name">
+            <select id="client-type" onchange="toggleSubscriptionOptions()">
                 <option value="prestations">Prestations</option>
                 <option value="abonnements">Abonnements</option>
             </select>
-            <div id="subscriptionOptions" style="display: none;">
-                <label for="subscriptionType">Type d'Abonnement</label>
-                <select id="subscriptionType">
-                    <option value="démarrage">Démarrage</option>
-                    <option value="standard">Standard</option>
-                    <option value="premium">Premium</option>
-                    <option value="entreprise">Entreprise</option>
-                </select>
+            <div id="subscription-options" style="display: none;">
+                <input type="text" id="signup-subscription" placeholder="Subscription Type">
             </div>
-            <button type="submit">Créer le compte</button>
-        </form>
+            <button onclick="signup()">Create Account</button>
+        </div>
     </div>
     <script type="module" src="admin_app.js"></script>
+    <script>
+        function toggleSubscriptionOptions() {
+            const clientType = document.getElementById('client-type').value;
+            const subscriptionOptions = document.getElementById('subscription-options');
+            if (clientType === 'abonnements') {
+                subscriptionOptions.style.display = 'block';
+            } else {
+                subscriptionOptions.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
