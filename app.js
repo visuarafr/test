@@ -33,14 +33,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     const clientData = docSnap.data();
                     console.log("Client data:", clientData);
                     document.getElementById('credits-count').innerText = clientData.photoCredits;
+
+                    // Redirection conditionnelle uniquement si sur la page d'accueil
+                    if (window.location.pathname.endsWith('/test/index.html') || window.location.pathname === '/test/') {
+                        window.location.replace('/test/selection.html');
+                    }
                 } else {
                     console.log("No such document!");
+                    // Pas de redirection si aucun document utilisateur trouvé
                 }
             } catch (error) {
                 console.error("Error getting document:", error);
             }
         } else {
             console.log('No user is signed in', window.location.pathname);
+            // Redirection conditionnelle uniquement si sur les pages protégées
+            if (window.location.pathname.endsWith('/test/dashboard.html') || window.location.pathname.endsWith('/test/selection.html')) {
+                window.location.replace('/test/index.html');
+            }
         }
     });
 });
@@ -53,6 +63,8 @@ window.login = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
             console.log("User logged in");
+            // Redirection vers la page de sélection après connexion réussie
+            window.location.replace('/test/selection.html');
         })
         .catch(error => {
             console.error("Login error:", error);
