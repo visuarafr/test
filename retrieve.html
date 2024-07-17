@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récupérer les Photos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Récupérer les Photos de Shootings</h1>
+        <div id="photos-container">
+            <!-- Les photos récupérées seront affichées ici -->
+        </div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+        var firebaseConfig = {
+            apiKey: "AIzaSyBKjWfl5lMhM1cftbrPK2ZbkaBOxqYGp7Y",
+            authDomain: "demande-shooting.firebaseapp.com",
+            projectId: "demande-shooting",
+            storageBucket: "demande-shooting.appspot.com",
+            messagingSenderId: "445564757883",
+            appId: "1:445564757883:web:605f43b554324a6e483fde",
+            measurementId: "G-RCRMBS7X79"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', async (event) => {
+            const user = auth.currentUser;
+            if (user) {
+                const querySnapshot = await getDocs(collection(db, "requests"));
+                const photosContainer = document.getElementById('photos-container');
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const photoDiv = document.createElement('div');
+                    photoDiv.classList.add('photo-entry');
+                    photoDiv.innerHTML = `
+                        <h3>Type: ${data.shootingType}</h3>
+                        <p>Date: ${data.date}</p>
+                        <p>Address: ${data.address}</p>
+                        <p>City: ${data.city}</p>
+                        <p>Region: ${data.region}</p>
+                        <p>Additional Info: ${data.additionalInfo}</p>
+                    `;
+                    photosContainer.appendChild(photoDiv);
+                });
+            } else {
+                window.location = 'index.html';
+            }
+        });
+
+        onAuthStateChanged(auth, user => {
+            if (!user) {
+                window.location = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
