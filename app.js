@@ -19,33 +19,32 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.addEventListener('DOMContentLoaded', async (event) => {
-    const user = auth.currentUser;
-    if (user) {
-        const docRef = doc(db, "clients", user.uid);
-        const docSnap = await getDoc(docRef);
+document.addEventListener('DOMContentLoaded', (event) => {
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // User is signed in
+            console.log('User is signed in', window.location.pathname);
+            const docRef = doc(db, "clients", user.uid);
+            const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-            const clientData = docSnap.data();
-            document.getElementById('credits-count').innerText = clientData.photoCredits;
+            if (docSnap.exists()) {
+                const clientData = docSnap.data();
+                document.getElementById('credits-count').innerText = clientData.photoCredits;
+            } else {
+                console.log("No such document!");
+            }
+            
+            if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
+                window.location.replace('/selection.html');
+            }
         } else {
-            console.log("No such document!");
+            // No user is signed in
+            console.log('No user is signed in', window.location.pathname);
+            if (!window.location.pathname.endsWith('/index.html') && window.location.pathname !== '/' && !window.location.pathname.endsWith('/admin_login.html')) {
+                window.location.replace('/index.html');
+            }
         }
-    }
-});
-
-onAuthStateChanged(auth, user => {
-    if (user) {
-        // User is signed in
-        if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
-            window.location.replace('/selection.html');
-        }
-    } else {
-        // No user is signed in
-        if (!window.location.pathname.endsWith('/index.html') && window.location.pathname !== '/' && !window.location.pathname.endsWith('/admin_login.html')) {
-            window.location.replace('/index.html');
-        }
-    }
+    });
 });
 
 // Login function
@@ -144,12 +143,4 @@ async function submitRequest(e) {
 // Function to send request to Trello
 function sendToTrello(request) {
     const trelloKey = 'be54e3f7ff2c69550f1ac28b202b7458';
-    const trelloToken = 'ATTAc64ad16d6a5dfa2af0d106b42cb1c9ffad6f80ac4c1e3fce4bb03801473eff247EDCE65C';
-    const listId = '6650d37d314c2a17bbcf7090'; 
-
-    fetch(`https://api.trello.com/1/cards?key=${trelloKey}&token=${trelloToken}&idList=${listId}&name=${encodeURIComponent('New Request')}&desc=${encodeURIComponent(`Type: ${request.shootingType}\nDate: ${request.date}\nAddress: ${request.address}\nCity: ${request.city}\nAdditional Info: ${request.additionalInfo}`)}`, {
-        method: 'POST'
-    }).then(response => response.json())
-      .then(data => console.log('Trello card created:', data))
-      .catch(error => console.error('Error creating Trello card:', error));
-}
+    const trelloToken = 'ATTAc64ad16d6a5dfa2af0d106b42cb1c9ffad6f80ac4c1e3fce4bb03801473eff247ED
