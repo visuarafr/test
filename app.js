@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, getDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -18,8 +18,6 @@ var firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const adminEmail = "yannmartial@visuara.fr";
 
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOMContentLoaded event fired");
@@ -42,12 +40,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     }
 
                     // Redirection conditionnelle uniquement si sur la page d'accueil
-                    if (window.location.pathname.endsWith('/test/index.html') || window.location.pathname === '/test/') {
-                        window.location.replace('/test/selection.html');
+                    if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
+                        window.location.replace('selection.html');
                     }
                 } else {
                     console.log("No such document!");
-                    // Affichez un message à l'utilisateur si aucun document utilisateur trouvé
                     alert('No user data found. Please contact support.');
                 }
             } catch (error) {
@@ -56,8 +53,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         } else {
             console.log('No user is signed in', window.location.pathname);
             // Redirection conditionnelle uniquement si sur les pages protégées
-            if (window.location.pathname.endsWith('/test/dashboard.html') || window.location.pathname.endsWith('/test/selection.html')) {
-                window.location.replace('/test/index.html');
+            if (window.location.pathname.endsWith('/dashboard.html') || window.location.pathname.endsWith('/selection.html')) {
+                window.location.replace('index.html');
             }
         }
     });
@@ -71,8 +68,7 @@ window.login = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
             console.log("User logged in");
-            // Redirection vers la page de sélection après connexion réussie
-            window.location.replace('/test/selection.html');
+            window.location.replace('selection.html');
         })
         .catch(error => {
             console.error("Login error:", error);
@@ -80,54 +76,16 @@ window.login = function() {
         });
 }
 
-// Admin Login function
-window.adminLogin = function() {
-    console.log("Admin login function called");
-    const email = document.getElementById('admin-email').value;
-    const password = document.getElementById('admin-password').value;
-    signInWithEmailAndPassword(auth, email, password)
-        .then(user => {
-            if (email === adminEmail) {
-                console.log("Admin logged in");
-                document.getElementById('admin-section').style.display = 'block';
-            } else {
-                alert("You are not authorized to access this section.");
-                auth.signOut();
-            }
+// Logout function
+window.logout = function() {
+    console.log("Logout function called");
+    signOut(auth)
+        .then(() => {
+            console.log("User logged out");
+            window.location.replace('index.html');
         })
         .catch(error => {
-            console.error("Admin login error:", error);
+            console.error("Logout error:", error);
             alert(error.message);
         });
-}
-
-// Signup function for creating new user accounts by admin
-window.signup = async function() {
-    console.log("Signup function called");
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const clientData = {
-        clientType: "abonnements",
-        companyName: document.getElementById('signup-company').value,
-        email: email,
-        photoCredits: 300,
-        subscriptionType: document.getElementById('signup-subscription').value
-    };
-    
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        console.log("User created with ID:", user.uid);
-
-        // Create a document in Firestore with the same ID as the user
-        const docRef = doc(db, "clients", user.uid);
-        await setDoc(docRef, clientData);
-        console.log("Document successfully written!");
-        
-        // Inform the admin that the user has been created
-        alert('User account created successfully.');
-    } catch (error) {
-        console.error("Error creating new user:", error);
-        alert(error.message);
-    }
 }
