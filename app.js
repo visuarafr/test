@@ -30,14 +30,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if (user) {
             // User is signed in
             console.log('User is signed in', window.location.pathname);
-            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
-                window.location.replace('/selection.html');
+            if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
+                window.location.replace('selection.html');
             }
         } else {
             // No user is signed in
             console.log('No user is signed in', window.location.pathname);
-            if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/admin_login.html') {
-                window.location.replace('/index.html');
+            if (!window.location.pathname.endsWith('index.html') && window.location.pathname !== '/' && !window.location.pathname.endsWith('admin_login.html')) {
+                window.location.replace('index.html');
             }
         }
     });
@@ -49,7 +49,7 @@ window.login = function() {
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location.replace('/selection.html');
+            window.location.replace('selection.html');
         })
         .catch(error => {
             alert(error.message);
@@ -62,7 +62,7 @@ window.signup = function() {
     const password = document.getElementById('password').value;
     createUserWithEmailAndPassword(auth, email, password)
         .then(user => {
-            window.location.replace('/selection.html');
+            window.location.replace('selection.html');
         })
         .catch(error => {
             alert(error.message);
