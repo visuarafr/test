@@ -11,24 +11,59 @@
         <h1>Faire une demande de shooting</h1>
         <form id="request-form">
             <label for="shootingType">Type de Shooting</label>
-            <select id="shootingType">
+            <select id="shootingType" onchange="updateShootingOptions()">
+                <option value="">Sélectionner un type</option>
                 <option value="photo">Photo</option>
                 <option value="video">Vidéo</option>
                 <option value="photo-video">Photo + Vidéo</option>
             </select>
+
+            <label for="specificShooting">Shooting Spécifique</label>
+            <select id="specificShooting" disabled>
+                <!-- Les options seront mises à jour dynamiquement -->
+            </select>
+
             <label for="date">Date</label>
             <input type="date" id="date">
             <label for="address">Adresse</label>
             <input type="text" id="address">
             <label for="city">Ville</label>
             <input type="text" id="city">
-            <label for="region">Région</label>
-            <input type="text" id="region">
             <label for="additionalInfo">Informations supplémentaires</label>
             <textarea id="additionalInfo"></textarea>
             <button type="submit">Envoyer</button>
         </form>
     </div>
     <script type="module" src="app.js"></script>
+    <script>
+        function updateShootingOptions() {
+            const shootingType = document.getElementById('shootingType').value;
+            const specificShooting = document.getElementById('specificShooting');
+            specificShooting.innerHTML = '';
+            specificShooting.disabled = false;
+
+            let options = [];
+            if (shootingType === 'photo') {
+                options = [
+                    { value: 'Signature', text: 'Signature (12 photos)' },
+                    { value: 'Héritage', text: 'Héritage (20 photos)' },
+                    { value: 'Excellence', text: 'Excellence (30 photos)' },
+                    { value: 'Prestige', text: 'Prestige (40 photos)' },
+                    { value: 'Démarrage', text: 'Démarrage (60/mois)' }
+                ];
+            } else if (shootingType === 'video') {
+                options = []; // Ajoutez des options de vidéo si disponible
+            } else if (shootingType === 'photo-video') {
+                options = []; // Ajoutez des options de photo + vidéo si disponible
+            }
+
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.text;
+                specificShooting.appendChild(opt);
+            });
+        }
+    </script>
 </body>
 </html>
