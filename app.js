@@ -5,12 +5,12 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.g
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
-    apiKey: "AIzaSyBKjWf5lMhM1cfbrPK2ZbkaBOxqYGp7Y",
+    apiKey: "AIzaSyBKjWfl5lMhM1cftbrPK2ZbkaBOxqYGp7Y",
     authDomain: "demande-shooting.firebaseapp.com",
     projectId: "demande-shooting",
     storageBucket: "demande-shooting.appspot.com",
     messagingSenderId: "445564757883",
-    appId: "1:445564757883:web:605f43b55432a46e6483fde"
+    appId: "1:445564757883:web:605f43b554324a6e483fde"
 };
 
 // Initialize Firebase
