@@ -19,7 +19,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const adminEmails = ["admin1@example.com", "admin2@example.com"]; // Replace with actual admin emails
+const adminEmail = "yannmartial@visuara.fr"; // Replace with the actual admin email
 
 window.adminLogin = function() {
     const email = document.getElementById('admin-email').value;
@@ -27,7 +27,7 @@ window.adminLogin = function() {
     signInWithEmailAndPassword(auth, email, password)
         .then(userCredential => {
             const user = userCredential.user;
-            if (adminEmails.includes(user.email)) {
+            if (user.email === adminEmail) {
                 window.location = 'create_account.html';
             } else {
                 alert("Vous n'avez pas l'autorisation d'accéder à cette page.");
