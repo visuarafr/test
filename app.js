@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getFirestore, getDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -19,6 +19,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const adminEmail = "yannmartial@visuara.fr";
+
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOMContentLoaded event fired");
     onAuthStateChanged(auth, async (user) => {
@@ -29,7 +31,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const userId = user.uid;
                 console.log("Authenticated user ID:", userId);
 
-                // Vérifiez si le document existe réellement
                 const docRef = doc(db, "clients", userId);
                 const docSnap = await getDoc(docRef);
 
@@ -77,4 +78,56 @@ window.login = function() {
             console.error("Login error:", error);
             alert(error.message);
         });
+}
+
+// Admin Login function
+window.adminLogin = function() {
+    console.log("Admin login function called");
+    const email = document.getElementById('admin-email').value;
+    const password = document.getElementById('admin-password').value;
+    signInWithEmailAndPassword(auth, email, password)
+        .then(user => {
+            if (email === adminEmail) {
+                console.log("Admin logged in");
+                document.getElementById('admin-section').style.display = 'block';
+            } else {
+                alert("You are not authorized to access this section.");
+                auth.signOut();
+            }
+        })
+        .catch(error => {
+            console.error("Admin login error:", error);
+            alert(error.message);
+        });
+}
+
+// Signup function for creating new user accounts by admin
+window.signup = async function() {
+    console.log("Signup function called");
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const clientData = {
+        clientType: "abonnements",
+        companyName: document.getElementById('signup-company').value,
+        email: email,
+        photoCredits: 300,
+        subscriptionType: document.getElementById('signup-subscription').value
+    };
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("User created with ID:", user.uid);
+
+        // Create a document in Firestore with the same ID as the user
+        const docRef = doc(db, "clients", user.uid);
+        await setDoc(docRef, clientData);
+        console.log("Document successfully written!");
+        
+        // Inform the admin that the user has been created
+        alert('User account created successfully.');
+    } catch (error) {
+        console.error("Error creating new user:", error);
+        alert(error.message);
+    }
 }
