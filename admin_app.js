@@ -49,19 +49,20 @@ window.signup = async function() {
     };
     
     try {
+        // Création de l'utilisateur
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log("User created with ID:", user.uid);
 
-        // Log the action to ensure it's being called
+        // Journalisation pour le débogage
         console.log("Attempting to create Firestore document with ID:", user.uid);
 
-        // Create a document in Firestore with the same ID as the user
+        // Création du document Firestore
         const docRef = doc(db, "clients", user.uid);
         await setDoc(docRef, clientData);
         console.log("Document successfully written!");
-        
-        // Inform the admin that the user has been created
+
+        // Informer l'admin que l'utilisateur a été créé
         alert('User account created successfully.');
     } catch (error) {
         console.error("Error creating new user:", error);
