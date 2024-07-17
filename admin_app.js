@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -52,21 +52,38 @@ window.toggleSubscriptionOptions = function() {
 document.getElementById('create-account-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
+    const clientEmail = document.getElementById('clientEmail').value;
     const companyName = document.getElementById('companyName').value;
     const clientType = document.getElementById('clientType').value;
     const subscriptionType = clientType === 'abonnements' ? document.getElementById('subscriptionType').value : null;
 
-    addDoc(collection(db, 'clients'), {
-        companyName,
-        clientType,
-        subscriptionType,
-        photoCredits: subscriptionType ? getPhotoCredits(subscriptionType) : null
-    }).then(() => {
-        alert('Compte client créé avec succès !');
-        document.getElementById('create-account-form').reset();
-    }).catch(error => {
-        console.error('Erreur lors de la création du compte : ', error);
-    });
+    createUserWithEmailAndPassword(auth, clientEmail, "temporaryPassword123") // Use a temporary password
+        .then(userCredential => {
+            const user = userCredential.user;
+
+            addDoc(collection(db, 'clients'), {
+                email: clientEmail,
+                companyName,
+                clientType,
+                subscriptionType,
+                photoCredits: subscriptionType ? getPhotoCredits(subscriptionType) : null
+            }).then(() => {
+                alert('Compte client créé avec succès !');
+                sendPasswordResetEmail(auth, clientEmail)
+                    .then(() => {
+                        alert('Un email a été envoyé au client pour définir son mot de passe.');
+                        document.getElementById('create-account-form').reset();
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de l\'envoi de l\'email de réinitialisation : ', error);
+                    });
+            }).catch(error => {
+                console.error('Erreur lors de la création du compte : ', error);
+            });
+        })
+        .catch(error => {
+            console.error('Erreur lors de la création de l\'utilisateur : ', error);
+        });
 });
 
 function getPhotoCredits(subscriptionType) {
