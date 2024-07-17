@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -19,88 +19,58 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const adminEmail = "yannmartial@visuara.fr"; // Replace with the actual admin email
-
+// Admin Login function
 window.adminLogin = function() {
+    console.log("Admin login function called");
     const email = document.getElementById('admin-email').value;
     const password = document.getElementById('admin-password').value;
     signInWithEmailAndPassword(auth, email, password)
-        .then(userCredential => {
-            const user = userCredential.user;
-            if (user.email === adminEmail) {
-                window.location = 'create_account.html';
-            } else {
-                alert("Vous n'avez pas l'autorisation d'accéder à cette page.");
-                auth.signOut();
-            }
+        .then(user => {
+            console.log("Admin logged in");
+            window.location.replace('create_account.html');
         })
         .catch(error => {
+            console.error("Admin login error:", error);
             alert(error.message);
         });
-};
+}
 
-window.toggleSubscriptionOptions = function() {
-    const clientType = document.getElementById('clientType').value;
-    const subscriptionOptions = document.getElementById('subscriptionOptions');
-    if (clientType === 'abonnements') {
-        subscriptionOptions.style.display = 'block';
-    } else {
-        subscriptionOptions.style.display = 'none';
-    }
-};
+// Signup function for creating new user accounts by admin
+window.signup = async function() {
+    console.log("Signup function called");
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const clientData = {
+        clientType: "abonnements",
+        companyName: document.getElementById('signup-company').value,
+        email: email,
+        photoCredits: 300,
+        subscriptionType: document.getElementById('signup-subscription').value
+    };
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("User created with ID:", user.uid);
 
-document.getElementById('create-account-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
+        // Log the action to ensure it's being called
+        console.log("Attempting to create Firestore document with ID:", user.uid);
 
-    const clientEmail = document.getElementById('clientEmail').value;
-    const companyName = document.getElementById('companyName').value;
-    const clientType = document.getElementById('clientType').value;
-    const subscriptionType = clientType === 'abonnements' ? document.getElementById('subscriptionType').value : null;
-
-    // Create the user with a temporary password
-    createUserWithEmailAndPassword(auth, clientEmail, "temporaryPassword123")
-        .then(userCredential => {
-            const user = userCredential.user;
-
-            // Add client details to Firestore
-            addDoc(collection(db, 'clients'), {
-                email: clientEmail,
-                companyName,
-                clientType,
-                subscriptionType,
-                photoCredits: subscriptionType ? getPhotoCredits(subscriptionType) : null
-            }).then(() => {
-                alert('Compte client créé avec succès !');
-
-                // Send password reset email
-                sendPasswordResetEmail(auth, clientEmail)
-                    .then(() => {
-                        alert('Un email a été envoyé au client pour définir son mot de passe.');
-                        document.getElementById('create-account-form').reset();
-                    })
-                    .catch(error => {
-                        console.error('Erreur lors de l\'envoi de l\'email de réinitialisation : ', error);
-                    });
-            }).catch(error => {
-                console.error('Erreur lors de la création du compte : ', error);
-            });
-        })
-        .catch(error => {
-            console.error('Erreur lors de la création de l\'utilisateur : ', error);
-        });
-});
-
-function getPhotoCredits(subscriptionType) {
-    switch (subscriptionType) {
-        case 'démarrage':
-            return 60;
-        case 'standard':
-            return 120;
-        case 'premium':
-            return 180;
-        case 'entreprise':
-            return 300;
-        default:
-            return 0;
+        // Create a document in Firestore with the same ID as the user
+        const docRef = doc(db, "clients", user.uid);
+        await setDoc(docRef, clientData);
+        console.log("Document successfully written!");
+        
+        // Inform the admin that the user has been created
+        alert('User account created successfully.');
+    } catch (error) {
+        console.error("Error creating new user:", error);
+        if (error.code === 'auth/email-already-in-use') {
+            alert('This email is already in use. Please use a different email.');
+        } else if (error.code === 'permission-denied') {
+            alert('You do not have permission to perform this action.');
+        } else {
+            alert('Error creating new user: ' + error.message);
+        }
     }
 }
