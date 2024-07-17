@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     console.log("No such document!");
                 }
 
-                if (window.location.pathname.endsWith('/test/index.html') || window.location.pathname === '/test/') {
+                // Redirection conditionnelle
+                if (window.location.pathname === '/test/index.html' || window.location.pathname === '/test/') {
                     window.location.replace('/test/selection.html');
                 }
             } catch (error) {
@@ -42,7 +43,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         } else {
             console.log('No user is signed in', window.location.pathname);
-            if (window.location.pathname.endsWith('/test/dashboard.html') || window.location.pathname.endsWith('/test/selection.html')) {
+            // Redirection conditionnelle
+            if (window.location.pathname === '/test/dashboard.html' || window.location.pathname === '/test/selection.html') {
                 window.location.replace('/test/index.html');
             }
         }
@@ -55,6 +57,7 @@ window.login = function() {
     const password = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, password)
         .then(user => {
+            console.log("User logged in");
             window.location.replace('/test/selection.html');
         })
         .catch(error => {
