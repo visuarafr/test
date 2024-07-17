@@ -1,11 +1,13 @@
+// app.js
+
 // Your web app's Firebase configuration
 var firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBKjWf5lMhM1cfbrPK2ZbkaBOxqYGp7Y",
+    authDomain: "demande-shooting.firebaseapp.com",
+    projectId: "demande-shooting",
+    storageBucket: "demande-shooting.appspot.com",
+    messagingSenderId: "445564757883",
+    appId: "1:445564757883:web:605f43b55432a46e6483fde"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -13,6 +15,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Login function
 function login() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -25,6 +28,7 @@ function login() {
         });
 }
 
+// Signup function
 function signup() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -37,6 +41,20 @@ function signup() {
         });
 }
 
+// Redirect to login if not authenticated
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // User is signed in
+        console.log('User is signed in');
+    } else {
+        // No user is signed in
+        if (window.location.pathname !== '/index.html') {
+            window.location = 'index.html';
+        }
+    }
+});
+
+// Function to submit request
 document.getElementById('request-form').addEventListener('submit', submitRequest);
 
 function submitRequest(e) {
@@ -66,10 +84,11 @@ function submitRequest(e) {
     });
 }
 
+// Function to send request to Trello
 function sendToTrello(request) {
-    const trelloKey = 'YOUR_TRELLO_KEY';
-    const trelloToken = 'YOUR_TRELLO_TOKEN';
-    const listId = 'YOUR_TRELLO_LIST_ID';
+    const trelloKey = 'be54e3f7ff2c69550f1ac28b202b7458';
+    const trelloToken = 'ATTAc64ad16d6a5dfa2af0d106b42cb1c9ffad6f80ac4c1e3fce4bb03801473eff247EDCE65C';
+    const listId = '6650d37d314c2a17bbcf7090'; 
 
     fetch(`https://api.trello.com/1/cards?key=${trelloKey}&token=${trelloToken}&idList=${listId}&name=${encodeURIComponent('New Request')}&desc=${encodeURIComponent(`Type: ${request.shootingType}\nDate: ${request.date}\nAddress: ${request.address}\nCity: ${request.city}\nRegion: ${request.region}\nAdditional Info: ${request.additionalInfo}`)}`, {
         method: 'POST'
