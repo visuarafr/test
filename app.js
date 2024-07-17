@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getFirestore, getDoc, doc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -18,6 +19,7 @@ var firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOMContentLoaded event fired");
@@ -53,7 +55,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         } else {
             console.log('No user is signed in', window.location.pathname);
             // Redirection conditionnelle uniquement si sur les pages protégées
-            if (window.location.pathname.endsWith('/dashboard.html') || window.location.pathname.endsWith('/selection.html')) {
+            if (window.location.pathname.endsWith('/dashboard.html') || window.location.pathname.endsWith('/selection.html') || window.location.pathname.endsWith('/retrieve.html')) {
                 window.location.replace('index.html');
             }
         }
@@ -89,3 +91,67 @@ window.logout = function() {
             alert(error.message);
         });
 }
+
+// Function to get user's shootings
+async function getUserShootings(user) {
+    const photosContainer = document.getElementById('photos-container');
+    if (!photosContainer) return;
+    photosContainer.innerHTML = '';
+
+    const q = query(collection(db, "requests"), where("userId", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const photoDiv = document.createElement('div');
+        photoDiv.classList.add('photo-entry');
+        photoDiv.innerHTML = `
+            <h3>Type: ${data.shootingType}</h3>
+            <p>Date: ${data.date}</p>
+            <p>Address: ${data.address}</p>
+            <p>City: ${data.city}</p>
+            <p>Additional Info: ${data.additionalInfo}</p>
+            <button onclick="viewShooting('${doc.id}')">View Photos/Videos</button>
+        `;
+        photosContainer.appendChild(photoDiv);
+    });
+}
+
+// Function to view a specific shooting
+window.viewShooting = async function(shootingId) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
+    const listRef = await listAll(storageRef);
+
+    const photosContainer = document.getElementById('photos-container');
+    if (!photosContainer) return;
+    photosContainer.innerHTML = '';
+
+    listRef.items.forEach(async (itemRef) => {
+        const url = await getDownloadURL(itemRef);
+        const mediaElement = document.createElement('div');
+        mediaElement.classList.add('media');
+
+        if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
+            mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}">`;
+        } else if (itemRef.name.endsWith('.mp4')) {
+            mediaElement.innerHTML = `<video controls src="${url}"></video>`;
+        }
+
+        photosContainer.appendChild(mediaElement);
+    });
+}
+
+// Check if user is authenticated
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("User authenticated, loading shootings");
+        getUserShootings(user);
+    } else {
+        if (window.location.pathname.endsWith('/retrieve.html')) {
+            window.location.replace('index.html');
+        }
+    }
+});
