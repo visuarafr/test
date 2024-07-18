@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Shooting</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Assign Shooting</h1>
+        <div>
+            <input type="text" id="search-company" placeholder="Search by Company Name">
+            <button onclick="searchCompany()">Search</button>
+        </div>
+        <div id="search-results">
+            <!-- Les résultats de recherche seront affichés ici -->
+        </div>
+        <div id="assign-shooting-form" style="display: none;">
+            <h2>Assign Shooting</h2>
+            <input type="date" id="shooting-date" placeholder="Date">
+            <input type="text" id="shooting-type" placeholder="Shooting Type">
+            <input type="text" id="shooting-address" placeholder="Address">
+            <input type="text" id="shooting-city" placeholder="City">
+            <textarea id="shooting-additional-info" placeholder="Additional Info"></textarea>
+            <input type="file" id="shooting-photos" multiple>
+            <button onclick="assignShooting()">Assign Shooting</button>
+        </div>
+        <button onclick="logout()">Logout</button>
+    </div>
+    <script type="module" src="admin_assign_shooting.js"></script>
+</body>
+</html>
