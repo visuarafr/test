@@ -1,23 +1,7 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, setDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
-
-// Your web app's Firebase configuration
-var firebaseConfig = {
-    apiKey: "AIzaSyBKjWfl5lMhM1cftbrPK2ZbkaBOxqYGp7Y",
-    authDomain: "demande-shooting.firebaseapp.com",
-    projectId: "demande-shooting",
-    storageBucket: "demande-shooting.appspot.com",
-    messagingSenderId: "445564757883",
-    appId: "1:445564757883:web:605f43b554324a6e483fde",
-    measurementId: "G-RCRMBS7X79"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// admin_app.js
+import { auth, db } from './firebase-config.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { setDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Function to check if the user has admin privileges
 async function checkAdminPermissions(user) {
@@ -109,7 +93,7 @@ window.signup = async function() {
         videoCredits: videoCredits,
         subscriptionType: clientType.includes("abonnements") ? document.getElementById('signup-subscription').value : ""
     };
-    
+
     try {
         const user = auth.currentUser;
         if (user && await checkAdminPermissions(user)) {
@@ -135,3 +119,4 @@ window.signup = async function() {
         alert('Error creating new user: ' + error.message);
     }
 }
+
