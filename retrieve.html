@@ -8,7 +8,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Récupérer les Photos de Shootings</h1>
+        <header>
+            <h1>Récupérer les Photos de Shootings</h1>
+            <button class="logout" onclick="logout()">Logout</button>
+        </header>
         <div class="filters">
             <input type="date" id="filter-date" placeholder="Filter by Date">
             <input type="text" id="filter-type" placeholder="Filter by Shooting Type">
@@ -24,7 +27,6 @@
             <span id="page-number">1</span>
             <button onclick="nextPage()">Next</button>
         </div>
-        <button class="logout" onclick="logout()">Logout</button>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -149,7 +151,7 @@
             });
         }
 
-                window.viewShooting = async function(shootingId) {
+        window.viewShooting = async function(shootingId) {
             const user = auth.currentUser;
             if (!user) return;
 
