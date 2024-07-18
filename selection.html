@@ -5,13 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selection</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Que souhaitez-vous faire ?</h1>
-        <button onclick="location.href='dashboard.html'">Faire une demande de shooting</button>
-        <button onclick="location.href='retrieve.html'">Récupérer les photos de shootings</button>
-        <button onclick="logout()">Déconnexion</button>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Que souhaitez-vous faire ?</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <img src="path-to-your-image1.jpg" class="card-img-top" alt="Faire une demande de shooting">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Faire une demande de shooting</h5>
+                        <p class="card-text">Soumettez une nouvelle demande de shooting facilement.</p>
+                        <a href="dashboard.html" class="btn btn-primary">Commencer</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <img src="path-to-your-image2.jpg" class="card-img-top" alt="Récupérer les photos de shootings">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Récupérer les photos de shootings</h5>
+                        <p class="card-text">Accédez aux photos et vidéos de vos précédents shootings.</p>
+                        <a href="retrieve.html" class="btn btn-primary">Voir les photos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <button onclick="logout()" class="btn btn-danger">Déconnexion</button>
+        </div>
     </div>
     <script type="module" src="app.js"></script>
 </body>
