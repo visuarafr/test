@@ -24,7 +24,7 @@
             <span id="page-number">1</span>
             <button onclick="nextPage()">Next</button>
         </div>
-        <button onclick="logout()">Logout</button>
+        <button class="logout" onclick="logout()">Logout</button>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -149,7 +149,7 @@
             });
         }
 
-        window.viewShooting = async function(shootingId) {
+                window.viewShooting = async function(shootingId) {
             const user = auth.currentUser;
             if (!user) return;
 
