@@ -14,42 +14,120 @@ body {
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     text-align: center;
-    width: 300px;
+    width: 80%;
+    max-width: 800px;
 }
 
-.header {
-    text-align: right;
+h1 {
+    color: #333;
     margin-bottom: 20px;
 }
 
-.admin-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
+.filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-.admin-button:hover {
-    background-color: #0056b3;
-}
-
-input, button {
-    width: 100%;
+.filters input,
+.filters button {
+    width: 30%;
     padding: 10px;
-    margin: 10px 0;
+    margin: 5px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-button {
+.filters button {
     background-color: #007bff;
     color: white;
-    border: none;
     cursor: pointer;
 }
 
-button:hover {
+.filters button:hover {
     background-color: #0056b3;
+}
+
+.photo-entry {
+    background: #f9f9f9;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    text-align: left;
+}
+
+.photo-entry h3 {
+    color: #007bff;
+    margin: 0 0 10px;
+}
+
+.photo-entry p {
+    color: #555;
+    margin: 5px 0;
+}
+
+.photo-entry button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.photo-entry button:hover {
+    background-color: #218838;
+}
+
+.no-shootings {
+    color: #777;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+#pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#pagination button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#pagination button:hover {
+    background-color: #0056b3;
+}
+
+#pagination span {
+    font-size: 16px;
+    color: #555;
+}
+
+.media img,
+.media video {
+    width: 100%;
+    max-width: 600px;
+    margin: 10px auto;
+    display: block;
+    border-radius: 4px;
+}
+
+button.logout {
+    background-color: #dc3545;
+    margin-top: 20px;
+}
+
+button.logout:hover {
+    background-color: #c82333;
 }
