@@ -1,7 +1,7 @@
-// app.js
+// Import the functions you need from the SDKs you need
 import { auth, db, storage } from './firebase-config.js';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getDoc, doc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getDoc, doc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -138,3 +138,146 @@ onAuthStateChanged(auth, (user) => {
         }
     }
 });
+
+// Function to handle request submission
+window.submitRequest = async function(e) {
+    e.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) {
+        window.location.replace('index.html');
+        return;
+    }
+
+    const shootingType = document.getElementById('shootingType').value;
+    const specificShooting = document.getElementById('specificShooting').value;
+    const date = document.getElementById('date').value;
+    const address = document.getElementById('address').value;
+    const city = document.getElementById('city').value;
+    const additionalInfo = document.getElementById('additionalInfo').value;
+
+    const docRef = doc(db, "clients", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        const clientData = docSnap.data();
+        let creditsRemaining = clientData.photoCredits;
+        let shootingsRemaining = clientData.shootingsRemaining || 0;
+
+        let creditsUsed = 0;
+        switch (specificShooting) {
+            case 'Signature':
+            case 'Signature+':
+                creditsUsed = 12;
+                break;
+            case 'Héritage':
+            case 'Héritage+':
+                creditsUsed = 20;
+                break;
+            case 'Excellence':
+            case 'Excellence+':
+                creditsUsed = 30;
+                break;
+            case 'Prestige':
+            case 'Prestige+':
+                creditsUsed = 40;
+                break;
+        }
+
+        if (creditsRemaining >= creditsUsed && (shootingsRemaining > 0 || clientData.subscriptionType === 'premium' || clientData.subscriptionType === 'entreprise')) {
+            await addDoc(collection(db, 'requests'), {
+                shootingType,
+                specificShooting,
+                date,
+                address,
+                city,
+                additionalInfo,
+                userId: user.uid,
+                createdAt: serverTimestamp()
+            });
+
+            creditsRemaining -= creditsUsed;
+            if (clientData.subscriptionType === 'demarrage' || clientData.subscriptionType === 'standard') {
+                shootingsRemaining--;
+            }
+
+            await updateDoc(docRef, {
+                photoCredits: creditsRemaining,
+                shootingsRemaining: shootingsRemaining
+            });
+
+            document.getElementById('credits-count').innerText = creditsRemaining;
+
+            alert('Request submitted!');
+            sendToTrello({ shootingType, specificShooting, date, address, city, additionalInfo });
+        } else {
+            alert('Not enough photo credits or shootings remaining');
+        }
+    } else {
+        console.log("No such document!");
+    }
+};
+
+// Function to send request to Trello
+function sendToTrello(request) {
+    const trelloKey = 'be54e3f7ff2c69550f1ac28b202b7458';
+    const trelloToken = 'ATTAc64ad16d6a5dfa2af0d106b42cb1c9ffad6f80ac4c1e3fce4bb03801473eff247EDCE65C';
+    const listId = '6650d37d314c2a17bbcf7090'; 
+
+    fetch(`https://api.trello.com/1/cards?key=${trelloKey}&token=${trelloToken}&idList=${listId}&name=${encodeURIComponent('New Request')}&desc=${encodeURIComponent(`Type: ${request.shootingType}\nDate: ${request.date}\nAddress: ${request.address}\nCity: ${request.city}\nAdditional Info: ${request.additionalInfo}`)}`, {
+        method: 'POST'
+    }).then(response => response.json())
+      .then(data => console.log('Trello card created:', data))
+      .catch(error => console.error('Error creating Trello card:', error));
+}
+
+// Reset credits and shootings on the 1st of the month
+async function resetCreditsAndShootings() {
+    const clientsRef = collection(db, 'clients');
+    const querySnapshot = await getDocs(clientsRef);
+
+    querySnapshot.forEach(async (clientDoc) => {
+        const clientData = clientDoc.data();
+        let newCredits = 0;
+        let newShootings = 0;
+
+        switch (clientData.subscriptionType) {
+            case 'demarrage':
+                newCredits = 60;
+                newShootings = 3;
+                break;
+            case 'standard':
+                newCredits = 100;
+                newShootings = 5;
+                break;
+            case 'premium':
+                newCredits = 180;
+                newShootings = 'unlimited'; // Shooting illimité
+                break;
+            case 'entreprise':
+                newCredits = 300;
+                newShootings = 'unlimited'; // Shooting illimité
+                break;
+        }
+
+        await updateDoc(clientDoc.ref, {
+            photoCredits: newCredits,
+            shootingsRemaining: newShootings !== 'unlimited' ? newShootings : clientData.shootingsRemaining,
+        });
+    });
+}
+
+function checkFirstOfMonth() {
+    const today = new Date();
+    if (today.getDate() === 1) {
+        resetCreditsAndShootings().then(() => {
+            console.log("Credits and shootings have been reset for the month.");
+        }).catch((error) => {
+            console.error("Error resetting credits and shootings:", error);
+        });
+    }
+}
+
+// Check and reset credits and shootings on page load
+document.addEventListener('DOMContentLoaded', checkFirstOfMonth);
+
