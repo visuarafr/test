@@ -249,7 +249,7 @@ window.submitRequest = async function(event) {
             });
 
             document.getElementById('credits-count').innerText = clientData.photoCredits - creditsRequired;
-                       document.getElementById('shootings-count').innerText = clientData.shootingsRemaining === 'unlimited' ? 'illimité' : clientData.shootingsRemaining - shootingsRequired;
+            document.getElementById('shootings-count').innerText =                 clientData.shootingsRemaining === 'unlimited' ? 'illimité' : clientData.shootingsRemaining - shootingsRequired;
 
             alert('Request submitted successfully!');
         } else {
@@ -263,3 +263,4 @@ window.submitRequest = async function(event) {
 
 // Bind the form submission to the submitRequest function
 document.getElementById('request-form').addEventListener('submit', submitRequest);
+
