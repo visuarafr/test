@@ -239,23 +239,11 @@ window.submitRequest = async function(event) {
     }
 }
 
-// Check if user is authenticated
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        console.log("User authenticated, loading shootings");
-        getUserShootings(user);
-    } else {
-        if (window.location.pathname.endsWith('/retrieve.html')) {
-            window.location.replace('index.html');
-        }
-    }
-});
-
 // Function to reset credits and shootings at the beginning of each month
 async function resetMonthlyCredits() {
     const usersQuery = query(collection(db, "clients"));
     const usersSnapshot = await getDocs(usersQuery);
-    usersSnapshot.forEach(async (userDoc) => {
+        usersSnapshot.forEach(async (userDoc) => {
         const userData = userDoc.data();
         let newPhotoCredits = 0;
         let newShootingsRemaining = 'unlimited';
