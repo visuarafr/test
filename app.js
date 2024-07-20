@@ -142,46 +142,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Function to reset credits and shootings at the beginning of each month
-async function resetMonthlyCredits() {
-    const usersQuery = query(collection(db, "clients"));
-    const usersSnapshot = await getDocs(usersQuery);
-    usersSnapshot.forEach(async (userDoc) => {
-        const userData = userDoc.data();
-        let newPhotoCredits = 0;
-        let newShootingsRemaining = 'unlimited';
-
-        switch (userData.subscriptionType) {
-            case 'Démarrage':
-                newPhotoCredits = 60;
-                newShootingsRemaining = 1;
-                break;
-            case 'Standard':
-                newPhotoCredits = 100;
-                newShootingsRemaining = 2;
-                break;
-            case 'Premium':
-                newPhotoCredits = 180;
-                break;
-            case 'Entreprise':
-                newPhotoCredits = 300;
-                break;
-            // Ajoutez d'autres cas si nécessaire
-        }
-
-        await updateDoc(doc(db, "clients", userDoc.id), {
-            photoCredits: newPhotoCredits,
-            shootingsRemaining: newShootingsRemaining
-        });
-    });
-}
-
-// Vérifiez si c'est le début du mois pour réinitialiser les crédits et les shootings
-const now = new Date();
-if (now.getDate() === 1) {
-    resetMonthlyCredits();
-}
-
 // Function to submit a new shooting request
 window.submitRequest = async function(event) {
     event.preventDefault();
