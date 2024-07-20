@@ -14,7 +14,10 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h1 class="card-title text-center">Faire une demande de shooting</h1>
-                        <div id="photo-credits" class="mb-4">Crédits de photos restants : <span id="credits-count">...</span></div>
+                        <div id="photo-credits" class="mb-4">
+                            Crédits de photos restants : <span id="credits-count">...</span><br>
+                            Shootings restants : <span id="shootings-count">...</span>
+                        </div>
                         <form id="request-form">
                             <div class="form-group">
                                 <label for="shootingType">Type de Shooting</label>
@@ -70,7 +73,7 @@
                 ];
             } else if (shootingType === 'photo-video') {
                 options = [
-                    { value: 'Signature+', text: 'Signature (12 photos + vidéo 45 sec )' },
+                    { value: 'Signature+', text: 'Signature (12 photos + vidéo 45 sec)' },
                     { value: 'Héritage+', text: 'Héritage (20 photos + vidéo 1 min)' },
                     { value: 'Excellence+', text: 'Excellence (30 photos + vidéo 1 min 30)' },
                     { value: 'Prestige+', text: 'Prestige (40 photos + vidéo 2 min)' },
