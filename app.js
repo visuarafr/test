@@ -1,5 +1,5 @@
 import { auth, db, storage } from './firebase-config.js';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { getDoc, doc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 import { sendToTrello } from './trello.js';
@@ -192,10 +192,6 @@ window.submitRequest = async function(event) {
             // Ajoutez d'autres cas si nécessaire
         }
 
-        console.log("Client data:", clientData);
-        console.log("Credits required:", creditsRequired);
-        console.log("Shootings required:", shootingsRequired);
-
         if (clientData.photoCredits >= creditsRequired && (clientData.shootingsRemaining === 'unlimited' || clientData.shootingsRemaining >= shootingsRequired)) {
             await addDoc(collection(db, 'requests'), {
                 shootingType,
@@ -242,6 +238,18 @@ window.submitRequest = async function(event) {
         }
     }
 }
+
+// Check if user is authenticated
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("User authenticated, loading shootings");
+        getUserShootings(user);
+    } else {
+        if (window.location.pathname.endsWith('/retrieve.html')) {
+            window.location.replace('index.html');
+        }
+    }
+});
 
 // Function to reset credits and shootings at the beginning of each month
 async function resetMonthlyCredits() {
