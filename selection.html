@@ -5,14 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selection</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center">Que souhaitez-vous faire ?</h1>
-        <div class="selection-buttons">
-            <button onclick="location.href='dashboard.html'" class="btn btn-primary">Faire une demande de shooting</button>
-            <button onclick="location.href='retrieve.html'" class="btn btn-secondary">Récupérer les photos de shootings</button>
-            <button onclick="logout()" class="btn btn-danger">Déconnexion</button>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="row w-100">
+            <div class="col-md-6 col-lg-4 offset-md-3 offset-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h1 class="card-title">Que souhaitez-vous faire ?</h1>
+                        <button class="btn btn-primary btn-block mb-2" onclick="location.href='dashboard.html'">Faire une demande de shooting</button>
+                        <button class="btn btn-secondary btn-block mb-2" onclick="location.href='retrieve.html'">Récupérer les photos de shootings</button>
+                        <button class="btn btn-link mt-2" onclick="logout()">Déconnexion</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script type="module" src="app.js"></script>
