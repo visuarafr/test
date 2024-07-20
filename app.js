@@ -33,217 +33,122 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     }
                 } else {
                     console.log("No such document!");
-                    alert('No user data found. Please contact support.');
                 }
             } catch (error) {
                 console.error("Error getting document:", error);
             }
         } else {
-            console.log('No user is signed in', window.location.pathname);
-            // Redirection conditionnelle uniquement si sur les pages protégées
-            if (window.location.pathname.endsWith('/dashboard.html') || window.location.pathname.endsWith('/selection.html') || window.location.pathname.endsWith('/retrieve.html')) {
-                window.location.replace('index.html');
-            }
+            // User is signed out
+            console.log('User is signed out');
         }
     });
 });
 
-// Login function
-window.login = function() {
-    console.log("Login function called");
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, email, password)
-        .then(user => {
-            console.log("User logged in");
-            window.location.replace('selection.html');
-        })
-        .catch(error => {
-            console.error("Login error:", error);
-            alert(error.message);
-        });
-}
-
-// Logout function
-window.logout = function() {
-    console.log("Logout function called");
-    signOut(auth)
-        .then(() => {
-            console.log("User logged out");
-            window.location.replace('index.html');
-        })
-        .catch(error => {
-            console.error("Logout error:", error);
-            alert(error.message);
-        });
-}
-
-// Function to get user's shootings
-async function getUserShootings(user) {
-    const photosContainer = document.getElementById('photos-container');
-    if (!photosContainer) return;
-    photosContainer.innerHTML = '';
-
-    const q = query(collection(db, "requests"), where("userId", "==", user.uid));
+window.searchCompany = async function() {
+    const companyName = document.getElementById('search-company').value;
+    console.log('Searching for company:', companyName);
+    const q = query(collection(db, "clients"), where("companyName", "==", companyName));
     const querySnapshot = await getDocs(q);
+    
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = '';
 
     querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const photoDiv = document.createElement('div');
-        photoDiv.classList.add('photo-entry');
-        photoDiv.innerHTML = `
-            <h3>Type: ${data.shootingType}</h3>
-            <p>Date: ${data.date}</p>
-            <p>Address: ${data.address}</p>
-            <p>City: ${data.city}</p>
-            <p>Additional Info: ${data.additionalInfo}</p>
-            <button onclick="viewShooting('${doc.id}')">View Photos/Videos</button>
+        const clientData = doc.data();
+        const resultDiv = document.createElement('div');
+        resultDiv.classList.add('result-entry');
+        resultDiv.innerHTML = `
+            <p>Company Name: ${clientData.companyName}</p>
+            <p>Email: ${clientData.email}</p>
+            <button onclick="selectClient('${doc.id}')">Select</button>
         `;
-        photosContainer.appendChild(photoDiv);
+        searchResults.appendChild(resultDiv);
     });
 }
 
-// Function to view a specific shooting
-window.viewShooting = async function(shootingId) {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
-    const listRef = await listAll(storageRef);
-
-    const photosContainer = document.getElementById('photos-container');
-    if (!photosContainer) return;
-    photosContainer.innerHTML = '';
-
-    listRef.items.forEach(async (itemRef) => {
-        const url = await getDownloadURL(itemRef);
-        const mediaElement = document.createElement('div');
-        mediaElement.classList.add('media');
-
-        if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
-            mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}">`;
-        } else if (itemRef.name.endsWith('.mp4')) {
-            mediaElement.innerHTML = `<video controls src="${url}"></video>`;
-        }
-
-        photosContainer.appendChild(mediaElement);
-    });
+window.selectClient = function(clientId) {
+    selectedClientId = clientId;
+    document.getElementById('assign-shooting-form').style.display = 'block';
+    console.log('Selected client:', clientId);
 }
 
-// Check if user is authenticated
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        console.log("User authenticated, loading shootings");
-        getUserShootings(user);
-    } else {
-        if (window.location.pathname.endsWith('/retrieve.html')) {
-            window.location.replace('index.html');
-        }
+window.assignShooting = async function() {
+    if (!selectedClientId) {
+        alert('Please select a client first.');
+        return;
     }
-});
 
-// Function to submit a new shooting request
-window.submitRequest = async function(event) {
-    event.preventDefault();
-    
-    const shootingType = document.getElementById('shootingType').value;
-    const specificShooting = document.getElementById('specificShooting').value;
-    const date = document.getElementById('date').value;
-    const address = document.getElementById('address').value;
-    const city = document.getElementById('city').value;
-    const additionalInfo = document.getElementById('additionalInfo').value;
+    const shootingDate = document.getElementById('shooting-date').value;
+    const shootingType = document.getElementById('shooting-type').value;
+    const shootingAddress = document.getElementById('shooting-address').value;
+    const shootingCity = document.getElementById('shooting-city').value;
+    const shootingAdditionalInfo = document.getElementById('shooting-additional-info').value;
+    const shootingPhotos = document.getElementById('shooting-photos').files;
 
-    const user = auth.currentUser;
-    if (!user) return;
+    console.log('Assigning shooting:', {
+        selectedClientId,
+        shootingDate,
+        shootingType,
+        shootingAddress,
+        shootingCity,
+        shootingAdditionalInfo,
+        shootingPhotosCount: shootingPhotos.length
+    });
 
-    const docRef = doc(db, "clients", user.uid);
-    const docSnap = await getDoc(docRef);
+    try {
+        const newShootingRef = await addDoc(collection(db, "requests"), {
+            userId: selectedClientId,
+            date: shootingDate,
+            shootingType: shootingType,
+            address: shootingAddress,
+            city: shootingCity,
+            additionalInfo: shootingAdditionalInfo,
+            createdAt: new Date()
+        });
 
-    if (docSnap.exists()) {
-        const clientData = docSnap.data();
-        let creditsRequired = 0;
-        let shootingsRequired = 1;
+        const shootingId = newShootingRef.id;
+        console.log('New shooting request created with ID:', shootingId);
 
-        switch (specificShooting) {
-            case 'Signature':
-                creditsRequired = 12;
-                break;
-            case 'Héritage':
-                creditsRequired = 20;
-                break;
-            case 'Excellence':
-                creditsRequired = 30;
-                break;
-            case 'Prestige':
-                creditsRequired = 40;
-                break;
-            case 'Signature+':
-                creditsRequired = 12;
-                break;
-            case 'Héritage+':
-                creditsRequired = 20;
-                break;
-            case 'Excellence+':
-                creditsRequired = 30;
-                break;
-            case 'Prestige+':
-                creditsRequired = 40;
-                break;
-            // Ajoutez d'autres cas si nécessaire
+        // Upload photos
+        for (let i = 0; i < shootingPhotos.length; i++) {
+            const photo = shootingPhotos[i];
+            const storageRef = ref(storage, `shootings/${selectedClientId}/${shootingId}/${photo.name}`);
+            await uploadBytes(storageRef, photo);
+            console.log('Uploaded photo:', photo.name);
         }
 
-        if (clientData.photoCredits >= creditsRequired && (clientData.shootingsRemaining === 'unlimited' || clientData.shootingsRemaining >= shootingsRequired)) {
-            await addDoc(collection(db, 'requests'), {
-                shootingType,
-                specificShooting,
-                date,
-                address,
-                city,
-                additionalInfo,
-                userId: user.uid,
-                createdAt: serverTimestamp()
-            });
+        // Send to Trello
+        const trelloRequest = {
+            shootingType,
+            date: shootingDate,
+            address: shootingAddress,
+            city: shootingCity,
+            additionalInfo: shootingAdditionalInfo
+        };
+        await sendToTrello(trelloRequest);
+        console.log('Shooting details sent to Trello');
 
-            await updateDoc(docRef, {
-                photoCredits: clientData.photoCredits - creditsRequired,
-                shootingsRemaining: clientData.shootingsRemaining === 'unlimited' ? 'unlimited' : clientData.shootingsRemaining - shootingsRequired
-            });
-
-            // Envoyer les informations de demande à Trello
-            const request = {
-                shootingType,
-                specificShooting,
-                date,
-                address,
-                city,
-                additionalInfo
-            };
-            try {
-                await sendToTrello(request);
-                alert('Request submitted successfully and added to Trello!');
-            } catch (error) {
-                console.error('Error sending to Trello:', error);
-                alert('Request submitted but failed to add to Trello.');
-            }
-
-            // Mettre à jour les crédits et shootings affichés
-            if (document.getElementById('credits-count')) {
-                document.getElementById('credits-count').innerText = clientData.photoCredits - creditsRequired;
-            }
-            if (document.getElementById('shootings-count')) {
-                document.getElementById('shootings-count').innerText = clientData.shootingsRemaining === 'unlimited' ? 'illimité' : clientData.shootingsRemaining - shootingsRequired;
-            }
-        } else {
-            alert('Not enough credits or shootings remaining.');
-        }
+        alert('Shooting assigned successfully.');
+    } catch (error) {
+        console.error("Error assigning shooting:", error);
+        alert('Error assigning shooting: ' + error.message);
     }
+}
+
+window.logout = function() {
+    signOut(auth).then(() => {
+        window.location.replace('index.html');
+        console.log('User signed out successfully');
+    }).catch((error) => {
+        console.error("Error signing out: ", error);
+    });
 }
 
 // Function to reset credits and shootings at the beginning of each month
 async function resetMonthlyCredits() {
     const usersQuery = query(collection(db, "clients"));
     const usersSnapshot = await getDocs(usersQuery);
-        usersSnapshot.forEach(async (userDoc) => {
+    usersSnapshot.forEach(async (userDoc) => {
         const userData = userDoc.data();
         let newPhotoCredits = 0;
         let newShootingsRemaining = 'unlimited';
@@ -278,3 +183,5 @@ const now = new Date();
 if (now.getDate() === 1) {
     resetMonthlyCredits();
 }
+
+// Add other functions and event listeners as needed
