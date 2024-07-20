@@ -219,7 +219,7 @@ window.submitRequest = async function(event) {
                 additionalInfo
             };
             try {
-                await sendToTrello (request);
+                await sendToTrello(request);
                 alert('Request submitted successfully and added to Trello!');
             } catch (error) {
                 console.error('Error sending to Trello:', error);
@@ -238,18 +238,6 @@ window.submitRequest = async function(event) {
         }
     }
 }
-
-// Check if user is authenticated
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        console.log("User authenticated, loading shootings");
-        getUserShootings(user);
-    } else {
-        if (window.location.pathname.endsWith('/retrieve.html')) {
-            window.location.replace('index.html');
-        }
-    }
-});
 
 // Function to reset credits and shootings at the beginning of each month
 async function resetMonthlyCredits() {
@@ -271,9 +259,11 @@ async function resetMonthlyCredits() {
                 break;
             case 'Premium':
                 newPhotoCredits = 180;
+                newShootingsRemaining = 'unlimited';
                 break;
             case 'Entreprise':
                 newPhotoCredits = 300;
+                newShootingsRemaining = 'unlimited';
                 break;
             // Ajoutez d'autres cas si nécessaire
         }
@@ -290,4 +280,3 @@ const now = new Date();
 if (now.getDate() === 1) {
     resetMonthlyCredits();
 }
-
