@@ -5,31 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Create New User Account</h1>
-        <div id="signup-form">
-            <input type="email" id="signup-email" placeholder="Email">
-            <input type="password" id="signup-password" placeholder="Password">
-            <input type="text" id="signup-company" placeholder="Company Name">
-            <select id="client-type" onchange="toggleSubscriptionOptions()">
-                <option value="prestations">Prestations</option>
-                <option value="prestations_plus">Prestations Plus</option>
-                <option value="abonnements">Abonnements</option>
-                <option value="abonnements_plus">Abonnements Plus</option>
-            </select>
-            <div id="subscription-options" style="display: none;">
-                <select id="signup-subscription">
-                    <option value="demarrage">Démarrage</option>
-                    <option value="standard">Standard</option>
-                    <option value="premium">Premium</option>
-                    <option value="entreprise">Entreprise</option>
-                </select>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="row w-100">
+            <div class="col-md-6 col-lg-4 offset-md-3 offset-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h1 class="card-title text-center">Create New User Account</h1>
+                        <form>
+                            <div class="form-group">
+                                <label for="signup-email">Email</label>
+                                <input type="email" class="form-control" id="signup-email" placeholder="Email">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-password">Password</label>
+                                <input type="password" class="form-control" id="signup-password" placeholder="Password">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-company">Company Name</label>
+                                <input type="text" class="form-control" id="signup-company" placeholder="Company Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="client-type">Client Type</label>
+                                <select class="form-control" id="client-type" onchange="toggleSubscriptionOptions()">
+                                    <option value="prestations">Prestations</option>
+                                    <option value="prestations_plus">Prestations Plus</option>
+                                    <option value="abonnements">Abonnements</option>
+                                    <option value="abonnements_plus">Abonnements Plus</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="subscription-options" style="display: none;">
+                                <label for="signup-subscription">Subscription Type</label>
+                                <select class="form-control" id="signup-subscription">
+                                    <option value="demarrage">Démarrage</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="entreprise">Entreprise</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-block" onclick="signup()">Create Account</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <button onclick="signup()">Create Account</button>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script type="module" src="admin_app.js"></script>
     <script>
         function toggleSubscriptionOptions() {
