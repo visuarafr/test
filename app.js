@@ -2,6 +2,7 @@ import { auth, db, storage } from './firebase-config.js';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { getDoc, doc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+import { sendToTrello } from './trello.js';
 
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOMContentLoaded event fired");
@@ -248,19 +249,85 @@ window.submitRequest = async function(event) {
                 shootingsRemaining: clientData.shootingsRemaining === 'unlimited' ? 'unlimited' : clientData.shootingsRemaining - shootingsRequired
             });
 
-            document.getElementById('credits-count').innerText = clientData.photoCredits - creditsRequired;
-            document.getElementById('shootings-count').innerText =                 clientData.shootingsRemaining === 'unlimited' ? 'illimité' : clientData.shootingsRemaining - shootingsRequired;
+            // Envoyer les informations de demande à Trello
+            const request = {
+                shootingType,
+                specificShooting,
+                date,
+                address,
+                city,
+                additionalInfo
+            };
+            try {
+                await sendToTrello(request);
+                alert('Request submitted successfully and added to Trello!');
+            } catch (error) {
+                console.error('Error sending to Trello:', error);
+                alert('Request submitted but failed to add to Trello.');
+            }
 
-            alert('Request submitted successfully!');
+            // Mettre à jour les crédits et shootings affichés
+            if (document.getElementById('credits-count')) {
+                document.getElementById('credits-count').innerText = clientData.photoCredits - creditsRequired;
+            }
+            if (document.getElementById('shootings-count')) {
+                document.getElementById('shootings-count').innerText = clientData.shootingsRemaining === 'unlimited' ? 'illimité' : clientData.shootingsRemaining - shootingsRequired;
+            }
         } else {
-            alert('Not enough photo credits or shootings remaining.');
+            alert('Not enough credits or shootings remaining.');
         }
-    } else {
-        console.log("No such document!");
-        alert('User data not found. Please contact support.');
     }
 }
 
-// Bind the form submission to the submitRequest function
-document.getElementById('request-form').addEventListener('submit', submitRequest);
+// Check if user is authenticated
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("User authenticated, loading shootings");
+        getUserShootings(user);
+    } else {
+        if (window.location.pathname.endsWith('/retrieve.html')) {
+            window.location.replace('index.html');
+        }
+    }
+});
+
+// Function to reset credits and shootings at the beginning of each month
+async function resetMonthlyCredits() {
+    const usersQuery = query(collection(db, "clients"));
+    const usersSnapshot = await getDocs(usersQuery);
+    usersSnapshot.forEach(async (userDoc) => {
+        const userData = userDoc.data();
+        let newPhotoCredits = 0;
+        let newShootingsRemaining = 'unlimited';
+
+        switch (userData.subscriptionType) {
+            case 'Démarrage':
+                newPhotoCredits = 60;
+                newShootingsRemaining = 1;
+                break;
+            case 'Standard':
+                newPhotoCredits = 100;
+                newShootingsRemaining = 2;
+                break;
+            case 'Premium':
+                newPhotoCredits = 180;
+                break;
+            case 'Entreprise':
+                newPhotoCredits = 300;
+                break;
+            // Ajoutez d'autres cas si nécessaire
+        }
+
+        await updateDoc(doc(db, "clients", userDoc.id), {
+            photoCredits: newPhotoCredits,
+            shootingsRemaining: newShootingsRemaining
+        });
+    });
+}
+
+// Vérifiez si c'est le début du mois pour réinitialiser les crédits et les shootings
+const now = new Date();
+if (now.getDate() === 1) {
+    resetMonthlyCredits();
+}
 
