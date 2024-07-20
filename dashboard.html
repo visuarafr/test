@@ -67,12 +67,12 @@
                     { value: 'Héritage', text: 'Héritage (20 photos)' },
                     { value: 'Excellence', text: 'Excellence (30 photos)' },
                     { value: 'Prestige', text: 'Prestige (40 photos)' },
-                    { value: 'Démarrage', text: 'Démarrage (60/mois)' }
                 ];
-            } else if (shootingType === 'video') {
-                options = []; // Ajoutez des options de vidéo si disponible
             } else if (shootingType === 'photo-video') {
-                options = []; // Ajoutez des options de photo + vidéo si disponible
+                    { value: 'Signature+', text: 'Signature (12 photos + vidéo 45 sec )' },
+                    { value: 'Héritage+', text: 'Héritage (20 photos + vidéo 1 min)' },
+                    { value: 'Excellence+', text: 'Excellence (30 photos + vidéo 1 min 30)' },
+                    { value: 'Prestige+', text: 'Prestige (40 photos + vidéo 2 min)' },
             }
 
             options.forEach(option => {
