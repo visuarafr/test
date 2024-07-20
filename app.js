@@ -259,11 +259,9 @@ async function resetMonthlyCredits() {
                 break;
             case 'Premium':
                 newPhotoCredits = 180;
-                newShootingsRemaining = 'unlimited';
                 break;
             case 'Entreprise':
                 newPhotoCredits = 300;
-                newShootingsRemaining = 'unlimited';
                 break;
             // Ajoutez d'autres cas si nécessaire
         }
