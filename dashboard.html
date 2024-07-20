@@ -5,35 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Faire une demande de shooting</h1>
-        <div id="photo-credits">Crédits de photos restants : <span id="credits-count">...</span></div>
-        <form id="request-form">
-            <label for="shootingType">Type de Shooting</label>
-            <select id="shootingType" onchange="updateShootingOptions()">
-                <option value="">Sélectionner un type</option>
-                <option value="photo">Photo</option>
-                <option value="video">Vidéo</option>
-                <option value="photo-video">Photo + Vidéo</option>
-            </select>
-
-            <label for="specificShooting">Shooting Spécifique</label>
-            <select id="specificShooting" disabled>
-                <!-- Les options seront mises à jour dynamiquement -->
-            </select>
-
-            <label for="date">Date</label>
-            <input type="date" id="date">
-            <label for="address">Adresse</label>
-            <input type="text" id="address">
-            <label for="city">Ville</label>
-            <input type="text" id="city">
-            <label for="additionalInfo">Informations supplémentaires</label>
-            <textarea id="additionalInfo"></textarea>
-            <button type="submit">Envoyer</button>
-        </form>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="row w-100">
+            <div class="col-md-8 col-lg-6 offset-md-2 offset-lg-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h1 class="card-title text-center">Faire une demande de shooting</h1>
+                        <div id="photo-credits" class="mb-4">Crédits de photos restants : <span id="credits-count">...</span></div>
+                        <form id="request-form">
+                            <div class="form-group">
+                                <label for="shootingType">Type de Shooting</label>
+                                <select class="form-control" id="shootingType" onchange="updateShootingOptions()">
+                                    <option value="">Sélectionner un type</option>
+                                    <option value="photo">Photo</option>
+                                    <option value="video">Vidéo</option>
+                                    <option value="photo-video">Photo + Vidéo</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="specificShooting">Shooting Spécifique</label>
+                                <select class="form-control" id="specificShooting" disabled></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="date">Date</label>
+                                <input type="date" class="form-control" id="date">
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Adresse</label>
+                                <input type="text" class="form-control" id="address">
+                            </div>
+                            <div class="form-group">
+                                <label for="city">Ville</label>
+                                <input type="text" class="form-control" id="city">
+                            </div>
+                            <div class="form-group">
+                                <label for="additionalInfo">Informations supplémentaires</label>
+                                <textarea class="form-control" id="additionalInfo"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Envoyer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="module" src="/test/app.js"></script>
     <script>
