@@ -142,8 +142,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
             const currentPath = window.location.pathname;
             const isAdminSelection = currentPath.includes('admin_selection.html');
+            const isAssignShooting = currentPath.includes('admin_assign_shooting.html');
+            const isCreateAccount = currentPath.includes('create_account.html');
 
-            if (docSnap.exists() && !isAdminSelection) {
+            if (docSnap.exists() && !isAdminSelection && !isAssignShooting && !isCreateAccount) {
                 window.location.replace('admin_selection.html');
             } else if (!docSnap.exists()) {
                 signOut(auth);
