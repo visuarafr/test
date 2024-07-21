@@ -140,11 +140,4 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const docRef = doc(db, "admins", user.uid);
             const docSnap = await getDoc(docRef);
 
-            if (docSnap.exists()) {
-                window.location.replace('admin_selection.html');
-            } else {
-                signOut(auth);
-            }
-        }
-    });
-});
+            co
