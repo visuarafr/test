@@ -5,20 +5,20 @@ import { getFirestore, query, collection, where, getDocs, addDoc, doc, getDoc, o
 import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
 let selectedClientId = null;
+let isAdmin = false;
 
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOMContentLoaded event fired");
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             console.log('User is signed in', user);
-            checkAdminPermissions(user).then(isAdmin => {
-                if (!isAdmin) {
-                    alert('You do not have admin permissions.');
-                    window.location.replace('index.html');
-                } else {
-                    loadClients();
-                }
-            });
+            isAdmin = await checkAdminPermissions(user);
+            if (!isAdmin) {
+                alert('You do not have admin permissions.');
+                window.location.replace('index.html');
+            } else {
+                loadClients();
+            }
         } else {
             console.log('No user is signed in');
             window.location.replace('index.html');
