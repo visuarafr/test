@@ -122,6 +122,8 @@ window.assignShooting = async function() {
 
         // Log the storage reference path
         console.log(`Uploading photos to path: shootings/${selectedClientId}/${shootingId}/`);
+        console.log(`User ID: ${selectedClientId}`);
+        console.log(`Shooting ID: ${shootingId}`);
 
         // Upload photos
         for (let i = 0; i < shootingPhotos.length; i++) {
