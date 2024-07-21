@@ -7,11 +7,11 @@ export async function sendToTrello(request, companyName) {
 
     const title = `Shooting ${companyName} ${request.date}`;
     const description = `
-Type de Shooting: ${request.shootingType}\n
-Shooting Spécifique: ${request.specificShooting}\n
-Date: ${request.date}\n
-Adresse: ${request.address}\n
-Ville: ${request.city}\n
+Type de Shooting: ${request.shootingType}<br>
+Shooting Spécifique: ${request.specificShooting}<br>
+Date: ${request.date}<br>
+Adresse: ${request.address}<br>
+Ville: ${request.city}<br>
 Informations supplémentaires: ${request.additionalInfo}
     `;
 
