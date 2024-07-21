@@ -1,7 +1,7 @@
 // admin_assign_shooting.js
 import { auth, db, storage } from './firebase-config.js';
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getFirestore, query, collection, where, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getFirestore, query, collection, where, getDocs, addDoc, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
 let selectedClientId = null;
@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 if (!isAdmin) {
                     alert('You do not have admin permissions.');
                     window.location.replace('index.html');
+                } else {
+                    loadClients();
                 }
             });
         } else {
@@ -28,6 +30,28 @@ async function checkAdminPermissions(user) {
     const docRef = doc(db, "admins", user.uid);
     const docSnap = await getDoc(docRef);
     return docSnap.exists();
+}
+
+async function loadClients() {
+    const q = query(collection(db, "clients"), orderBy("companyName"));
+    const querySnapshot = await getDocs(q);
+    
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = '';
+
+    querySnapshot.forEach((doc) => {
+        const clientData = doc.data();
+        const resultDiv = document.createElement('div');
+        resultDiv.classList.add('result-entry');
+        resultDiv.innerHTML = `
+            <div>
+                <p>Company Name: ${clientData.companyName}</p>
+                <p>Email: ${clientData.email}</p>
+            </div>
+            <button onclick="selectClient('${doc.id}')">Select</button>
+        `;
+        searchResults.appendChild(resultDiv);
+    });
 }
 
 window.searchCompany = async function() {
@@ -51,6 +75,10 @@ window.searchCompany = async function() {
         `;
         searchResults.appendChild(resultDiv);
     });
+
+    if (querySnapshot.empty) {
+        searchResults.innerHTML = '<p class="no-results">No companies found.</p>';
+    }
 }
 
 window.selectClient = function(clientId) {
