@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Selection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        .card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .btn-link {
+            background-color: transparent;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="row w-100">
+            <div class="col-md-6 col-lg-4 offset-md-3 offset-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h1 class="card-title">Que souhaitez-vous faire ?</h1>
+                        <button class="btn btn-primary btn-block mb-2" onclick="location.href='admin_assign_shooting.html'">Assign Shooting</button>
+                        <button class="btn btn-secondary btn-block mb-2" onclick="location.href='create_account.html'">Create Account</button>
+                        <button class="btn btn-link mt-2" onclick="logout()">Déconnexion</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="admin_app.js"></script>
+</body>
+</html>
