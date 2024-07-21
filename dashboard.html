@@ -54,6 +54,9 @@
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Envoyer</button>
                         </form>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-link" onclick="goBack()">Retour à la sélection</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -90,6 +93,10 @@
                 opt.textContent = option.text;
                 specificShooting.appendChild(opt);
             });
+        }
+
+        function goBack() {
+            window.location.replace('selection.html');
         }
     </script>
 </body>
