@@ -9,25 +9,37 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            background-color: #f0f2f5;
+            background-color: #f8f9fa;
         }
         .container {
             max-width: 1200px;
             margin-top: 50px;
         }
-        .folder {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin: 10px;
-            cursor: pointer;
-            background-color: #fff;
-            transition: background-color 0.3s ease;
+        .navbar {
+            margin-bottom: 20px;
+            background-color: #007bff;
+            color: #ffffff;
         }
-        .folder:hover {
-            background-color: #e2e6ea;
+        .navbar-brand, .logout-btn {
+            color: #ffffff;
+        }
+        .logout-btn {
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .breadcrumb {
+            background-color: transparent;
+            padding-left: 0;
+        }
+        .card {
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
         }
         .folder-icon {
             font-size: 2rem;
@@ -43,46 +55,16 @@
             height: auto;
             margin-bottom: 15px;
         }
-        .navbar {
-            margin-bottom: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .media-container {
-            margin-top: 20px;
-        }
-        .breadcrumb {
-            background-color: transparent;
-        }
-        .card {
-            margin-bottom: 20px;
+        .pagination {
+            justify-content: center;
         }
         .no-shootings {
             margin: 50px 0;
         }
-        .pagination {
-            justify-content: center;
-        }
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .logout-btn {
-            font-size: 0.875rem;
-            padding: 0.5rem 1rem;
-            background-color: transparent;
-            border: none;
-            color: #007bff;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        .logout-btn:hover {
-            color: #0056b3;
-        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="#">Photo Shooting</a>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -95,10 +77,12 @@
         </div>
     </nav>
     <div class="container">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">Shootings</li>
-            <li class="breadcrumb-item d-none" id="breadcrumb-folder"><a href="#" onclick="goBack()">Photos/Vidéos</a></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">Shootings</li>
+                <li class="breadcrumb-item d-none" id="breadcrumb-folder"><a href="#" onclick="goBack()">Photos/Vidéos</a></li>
+            </ol>
+        </nav>
         <div id="photos-container" class="row justify-content-center">
             <!-- Les dossiers et fichiers récupérés seront affichés ici -->
         </div>
@@ -159,7 +143,7 @@
                     const folderDiv = document.createElement('div');
                     folderDiv.classList.add('col-md-6', 'col-lg-4');
                     folderDiv.innerHTML = `
-                        <div class="card folder" onclick="viewShooting('${doc.id}')">
+                        <div class="card" onclick="viewShooting('${doc.id}')">
                             <div class="card-body">
                                 <i class="fas fa-folder folder-icon"></i>
                                 <div class="folder-title">${data.date} - ${data.shootingType}</div>
