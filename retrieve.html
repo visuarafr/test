@@ -61,8 +61,10 @@
         .pagination {
             justify-content: center;
         }
-        .no-shootings {
+        .no-shootings, .no-files {
             margin: 50px 0;
+            text-align: center;
+            color: #888;
         }
     </style>
 </head>
@@ -135,7 +137,7 @@
             const listRef = await listAll(storageRef);
 
             if (listRef.prefixes.length === 0) {
-                photosContainer.innerHTML = '<p class="no-shootings text-center w-100">No shootings found. Please check back later.</p>';
+                photosContainer.innerHTML = '<p class="no-shootings">Aucun dossier trouvé. Veuillez vérifier plus tard.</p>';
             } else {
                 listRef.prefixes.forEach(folderRef => {
                     const folderDiv = document.createElement('div');
@@ -164,19 +166,23 @@
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.getElementById('breadcrumb-folder').classList.add('active');
 
-            listRef.items.forEach(async (itemRef) => {
-                const url = await getDownloadURL(itemRef);
-                const mediaElement = document.createElement('div');
-                mediaElement.classList.add('media', 'mb-4');
+            if (listRef.items.length === 0) {
+                photosContainer.innerHTML = '<p class="no-files">Aucun fichier trouvé dans ce dossier.</p>';
+            } else {
+                listRef.items.forEach(async (itemRef) => {
+                    const url = await getDownloadURL(itemRef);
+                    const mediaElement = document.createElement('div');
+                    mediaElement.classList.add('media', 'mb-4');
 
-                if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
-                    mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}" class="img-fluid">`;
-                } else if (itemRef.name.endsWith('.mp4')) {
-                    mediaElement.innerHTML = `<video controls src="${url}" class="img-fluid"></video>`;
-                }
+                    if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
+                        mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}" class="img-fluid">`;
+                    } else if (itemRef.name.endsWith('.mp4')) {
+                        mediaElement.innerHTML = `<video controls src="${url}" class="img-fluid"></video>`;
+                    }
 
-                photosContainer.appendChild(mediaElement);
-            });
+                    photosContainer.appendChild(mediaElement);
+                });
+            }
         }
 
         window.goBack = function() {
