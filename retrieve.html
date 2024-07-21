@@ -70,6 +70,14 @@
         .logout-btn {
             font-size: 0.875rem;
             padding: 0.5rem 1rem;
+            background-color: transparent;
+            border: none;
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            color: #0056b3;
         }
     </style>
 </head>
@@ -80,7 +88,7 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
                     </li>
                 </ul>
             </div>
