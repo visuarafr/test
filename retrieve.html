@@ -127,13 +127,33 @@
             }
         });
 
+        // Fonction pour charger les shootings
         async function loadShootings(user) {
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
             document.getElementById('breadcrumb-folder').classList.add('d-none');
 
-            let q = query(collection(db, "requests"), where("userId", "==", user.uid), orderBy("date", "desc"), limit(itemsPerPage));
+            // Ajout de dossiers de test
+            const testFolders = [
+                { date: '2023-07-21', shootingType: 'Wedding' },
+                { date: '2023-07-20', shootingType: 'Birthday' },
+                { date: '2023-07-19', shootingType: 'Corporate' }
+            ];
 
+            testFolders.forEach(folder => {
+                const folderDiv = document.createElement('div');
+                folderDiv.classList.add('list-group-item', 'folder');
+                folderDiv.setAttribute('onclick', `viewShooting('test-folder')`);
+                folderDiv.innerHTML = `
+                    <i class="fas fa-folder folder-icon"></i>
+                    <div class="folder-title">${folder.date} - ${folder.shootingType}</div>
+                `;
+                photosContainer.appendChild(folderDiv);
+            });
+
+            // Commentaire pour supprimer les lignes suivantes en production
+            /*let q = query(collection(db, "requests"), where("userId", "==", user.uid), orderBy("date", "desc"), limit(itemsPerPage));
+            
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
@@ -152,7 +172,7 @@
                     `;
                     photosContainer.appendChild(folderDiv);
                 });
-            }
+            }*/
         }
 
         window.previousPage = function() {
@@ -179,15 +199,36 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
-            const listRef = await listAll(storageRef);
-
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
 
             document.getElementById('breadcrumb-folder').classList.remove('d-none');
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.getElementById('breadcrumb-folder').classList.add('active');
+
+            // Ajout de fichiers de test
+            const testFiles = [
+                { name: 'photo1.jpg', url: 'https://via.placeholder.com/150' },
+                { name: 'photo2.jpg', url: 'https://via.placeholder.com/150' },
+                { name: 'video1.mp4', url: 'https://via.placeholder.com/150.mp4' }
+            ];
+
+            testFiles.forEach(file => {
+                const mediaElement = document.createElement('div');
+                mediaElement.classList.add('media', 'mb-4');
+
+                if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
+                    mediaElement.innerHTML = `<img src="${file.url}" alt="${file.name}" class="img-fluid">`;
+                } else if (file.name.endsWith('.mp4')) {
+                    mediaElement.innerHTML = `<video controls src="${file.url}" class="img-fluid"></video>`;
+                }
+
+                photosContainer.appendChild(mediaElement);
+            });
+
+            // Commentaire pour supprimer les lignes suivantes en production
+            /*const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
+            const listRef = await listAll(storageRef);
 
             listRef.items.forEach(async (itemRef) => {
                 const url = await getDownloadURL(itemRef);
@@ -201,7 +242,7 @@
                 }
 
                 photosContainer.appendChild(mediaElement);
-            });
+            });*/
         }
 
         window.goBack = function() {
