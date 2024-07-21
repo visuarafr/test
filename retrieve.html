@@ -137,7 +137,7 @@
             const listRef = await listAll(storageRef);
 
             if (listRef.prefixes.length === 0) {
-                photosContainer.innerHTML = '<p class="no-shootings">Aucun dossier trouvé. Veuillez vérifier plus tard.</p>';
+                photosContainer.innerHTML = '<p class="no-shootings">Aucun dossier.</p>';
             } else {
                 listRef.prefixes.forEach(folderRef => {
                     const folderDiv = document.createElement('div');
