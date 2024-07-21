@@ -12,12 +12,13 @@ export async function sendToTrello(request, companyName) {
 <b>Date:</b> ${request.date}<br>
 <b>Adresse:</b> ${request.address}<br>
 <b>Ville:</b> ${request.city}<br>
-<b>Informations supplémentaires:</b> ${request.additionalInfo}
-<br>
+<b>Informations supplémentaires:</b> ${request.additionalInfo}<br>
     `;
 
     const url = `https://api.trello.com/1/cards?key=${trelloKey}&token=${trelloToken}&idList=${listId}&name=${encodeURIComponent(title)}&desc=${encodeURIComponent(description)}`;
 
+    console.log('Trello request URL:', url);
+    
     try {
         const response = await fetch(url, {
             method: 'POST'
