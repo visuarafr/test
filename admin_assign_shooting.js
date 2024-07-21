@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log('User is signed in', user);
-            // Check if user is an admin
             checkAdminPermissions(user).then(isAdmin => {
                 if (!isAdmin) {
                     alert('You do not have admin permissions.');
@@ -44,8 +43,10 @@ window.searchCompany = async function() {
         const resultDiv = document.createElement('div');
         resultDiv.classList.add('result-entry');
         resultDiv.innerHTML = `
-            <p>Company Name: ${clientData.companyName}</p>
-            <p>Email: ${clientData.email}</p>
+            <div>
+                <p>Company Name: ${clientData.companyName}</p>
+                <p>Email: ${clientData.email}</p>
+            </div>
             <button onclick="selectClient('${doc.id}')">Select</button>
         `;
         searchResults.appendChild(resultDiv);
