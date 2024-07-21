@@ -1,4 +1,3 @@
-// admin_assign_shooting.js
 import { auth, db, storage } from './firebase-config.js';
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { getFirestore, query, collection, where, getDocs, addDoc, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
