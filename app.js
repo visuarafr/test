@@ -132,6 +132,7 @@ window.submitRequest = async function(event) {
     const shootingType = document.getElementById('shootingType').value;
     const specificShooting = document.getElementById('specificShooting').value;
     const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value; // Récupérer l'heure
     const address = document.getElementById('address').value;
     const city = document.getElementById('city').value;
     const additionalInfo = document.getElementById('additionalInfo').value;
@@ -180,6 +181,7 @@ window.submitRequest = async function(event) {
                 shootingType,
                 specificShooting,
                 date,
+                time, // Inclure l'heure
                 address,
                 city,
                 additionalInfo,
@@ -197,6 +199,7 @@ window.submitRequest = async function(event) {
                 shootingType,
                 specificShooting,
                 date,
+                time, // Inclure l'heure
                 address,
                 city,
                 additionalInfo
