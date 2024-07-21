@@ -140,4 +140,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const docRef = doc(db, "admins", user.uid);
             const docSnap = await getDoc(docRef);
 
-            co
+            const currentPath = window.location.pathname;
+            const isAdminSelection = currentPath.includes('admin_selection.html');
+
+            if (docSnap.exists() && !isAdminSelection) {
+                window.location.replace('admin_selection.html');
+            } else if (!docSnap.exists()) {
+                signOut(auth);
+            }
+        }
+    });
+});
