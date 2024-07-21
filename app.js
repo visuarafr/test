@@ -1,15 +1,14 @@
 import { auth, db, storage } from './firebase-config.js';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getDoc, doc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
-import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+import { getDoc, doc, collection, query, where, getDocs, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { ref, uploadBytes } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 import { sendToTrello } from './trello.js';
 
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOMContentLoaded event fired");
     onAuthStateChanged(auth, async (user) => {
-        console.log("onAuthStateChanged event fired");
         if (user) {
-            console.log('User is signed in', window.location.pathname);
+            console.log('User is signed in', user.uid, window.location.pathname);
             try {
                 const userId = user.uid;
                 console.log("Authenticated user ID:", userId);
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         document.getElementById('shootings-count').innerText = clientData.shootingsRemaining === 'unlimited' ? 'illimité' : clientData.shootingsRemaining;
                     }
 
-                    // Redirection conditionnelle uniquement si sur la page d'accueil
                     if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
                         window.location.replace('selection.html');
                     }
@@ -38,11 +36,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 console.error("Error getting document:", error);
             }
         } else {
-            // User is signed out
             console.log('User is signed out');
         }
     });
 });
+
+window.login = function() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            console.log('User signed in:', user.uid);
+        })
+        .catch((error) => {
+            console.error('Error signing in:', error);
+            alert('Error signing in: ' + error.message);
+        });
+};
 
 window.searchCompany = async function() {
     const companyName = document.getElementById('search-company').value;
@@ -64,13 +76,14 @@ window.searchCompany = async function() {
         `;
         searchResults.appendChild(resultDiv);
     });
-}
+    console.log('Search completed, results updated');
+};
 
 window.selectClient = function(clientId) {
     selectedClientId = clientId;
     document.getElementById('assign-shooting-form').style.display = 'block';
     console.log('Selected client:', clientId);
-}
+};
 
 window.assignShooting = async function() {
     if (!selectedClientId) {
@@ -109,7 +122,6 @@ window.assignShooting = async function() {
         const shootingId = newShootingRef.id;
         console.log('New shooting request created with ID:', shootingId);
 
-        // Upload photos
         for (let i = 0; i < shootingPhotos.length; i++) {
             const photo = shootingPhotos[i];
             const storageRef = ref(storage, `shootings/${selectedClientId}/${shootingId}/${photo.name}`);
@@ -117,7 +129,6 @@ window.assignShooting = async function() {
             console.log('Uploaded photo:', photo.name);
         }
 
-        // Send to Trello
         const trelloRequest = {
             shootingType,
             date: shootingDate,
@@ -133,7 +144,7 @@ window.assignShooting = async function() {
         console.error("Error assigning shooting:", error);
         alert('Error assigning shooting: ' + error.message);
     }
-}
+};
 
 window.logout = function() {
     signOut(auth).then(() => {
@@ -142,7 +153,7 @@ window.logout = function() {
     }).catch((error) => {
         console.error("Error signing out: ", error);
     });
-}
+};
 
 // Function to reset credits and shootings at the beginning of each month
 async function resetMonthlyCredits() {
@@ -183,5 +194,3 @@ const now = new Date();
 if (now.getDate() === 1) {
     resetMonthlyCredits();
 }
-
-// Add other functions and event listeners as needed
