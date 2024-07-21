@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 });
 
-// Login function
 window.login = function() {
     console.log("Login function called");
     const email = document.getElementById('email').value;
@@ -64,7 +63,6 @@ window.login = function() {
         });
 }
 
-// Logout function
 window.logout = function() {
     console.log("Logout function called");
     signOut(auth)
@@ -78,7 +76,6 @@ window.logout = function() {
         });
 }
 
-// Function to get user's shootings
 async function getUserShootings(user) {
     const photosContainer = document.getElementById('photos-container');
     if (!photosContainer) return;
@@ -103,7 +100,6 @@ async function getUserShootings(user) {
     });
 }
 
-// Function to view a specific shooting
 window.viewShooting = async function(shootingId) {
     const user = auth.currentUser;
     if (!user) return;
@@ -130,7 +126,6 @@ window.viewShooting = async function(shootingId) {
     });
 }
 
-// Function to submit a new shooting request
 window.submitRequest = async function(event) {
     event.preventDefault();
     
@@ -207,7 +202,7 @@ window.submitRequest = async function(event) {
                 additionalInfo
             };
             try {
-                await sendToTrello (request);
+                await sendToTrello(request);
                 alert('Request submitted successfully and added to Trello!');
             } catch (error) {
                 console.error('Error sending to Trello:', error);
@@ -244,7 +239,7 @@ async function resetMonthlyCredits() {
     const usersQuery = query(collection(db, "clients"));
     const usersSnapshot = await getDocs(usersQuery);
     usersSnapshot.forEach(async (userDoc) => {
-                const userData = userDoc.data();
+        const userData = userDoc.data();
         let newPhotoCredits = 0;
         let newShootingsRemaining = 'unlimited';
 
