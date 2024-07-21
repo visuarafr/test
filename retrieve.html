@@ -115,7 +115,7 @@
         let lastVisible = null;
         let firstVisible = null;
 
-        function logout() {
+        window.logout = function() {
             signOut(auth).then(() => {
                 window.location.replace('index.html');
             }).catch((error) => {
