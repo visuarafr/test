@@ -18,7 +18,7 @@
                             Crédits de photos restants : <span id="credits-count">...</span><br>
                             Shootings restants : <span id="shootings-count">...</span>
                         </div>
-                        <form id="request-form">
+                        <form id="request-form" onsubmit="submitRequest(event)">
                             <div class="form-group">
                                 <label for="shootingType">Type de Shooting</label>
                                 <select class="form-control" id="shootingType" onchange="updateShootingOptions()">
