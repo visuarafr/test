@@ -13,6 +13,7 @@
         }
         .container {
             max-width: 1200px;
+            margin-top: 50px;
         }
         .folder {
             display: flex;
@@ -51,6 +52,15 @@
         .breadcrumb {
             background-color: transparent;
         }
+        .card {
+            margin-bottom: 20px;
+        }
+        .no-shootings {
+            margin: 50px 0;
+        }
+        .pagination {
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -72,14 +82,16 @@
             <li class="breadcrumb-item active" aria-current="page">Shootings</li>
             <li class="breadcrumb-item d-none" id="breadcrumb-folder"><a href="#" onclick="goBack()">Photos/Vidéos</a></li>
         </ol>
-        <div id="photos-container" class="row">
+        <div id="photos-container" class="row justify-content-center">
             <!-- Les dossiers et fichiers récupérés seront affichés ici -->
         </div>
-        <div id="pagination" class="d-flex justify-content-center mt-4">
-            <button class="btn btn-primary mr-2" onclick="previousPage()">Previous</button>
-            <span id="page-number" class="align-self-center">1</span>
-            <button class="btn btn-primary ml-2" onclick="nextPage()">Next</button>
-        </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item"><button class="page-link" onclick="previousPage()">Previous</button></li>
+                <li class="page-item disabled"><span class="page-link" id="page-number">1</span></li>
+                <li class="page-item"><button class="page-link" onclick="nextPage()">Next</button></li>
+            </ul>
+        </nav>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
@@ -128,11 +140,13 @@
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const folderDiv = document.createElement('div');
-                    folderDiv.classList.add('col-md-6', 'col-lg-4', 'mb-4');
+                    folderDiv.classList.add('col-md-6', 'col-lg-4');
                     folderDiv.innerHTML = `
-                        <div class="folder" onclick="viewShooting('${doc.id}')">
-                            <i class="fas fa-folder folder-icon"></i>
-                            <div class="folder-title">${data.date} - ${data.shootingType}</div>
+                        <div class="card folder" onclick="viewShooting('${doc.id}')">
+                            <div class="card-body">
+                                <i class="fas fa-folder folder-icon"></i>
+                                <div class="folder-title">${data.date} - ${data.shootingType}</div>
+                            </div>
                         </div>
                     `;
                     photosContainer.appendChild(folderDiv);
