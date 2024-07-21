@@ -202,6 +202,7 @@ window.submitRequest = async function(event) {
                 additionalInfo
             };
             try {
+                console.log('Sending request to Trello with data:', request);
                 await sendToTrello(request, clientData.companyName);
                 alert('Request submitted successfully and added to Trello!');
             } catch (error) {
