@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 async function checkAdminPermissions(user) {
     const docRef = doc(db, "admins", user.uid);
     const docSnap = await getDoc(docRef);
+    console.log("Admin check: ", docSnap.exists());
     return docSnap.exists();
 }
 
