@@ -6,7 +6,6 @@
     <title>Récupérer les Photos</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -16,7 +15,6 @@
             margin-top: 20px;
         }
         .navbar {
-            margin-bottom: 20px;
             background-color: #343a40;
         }
         .navbar-brand, .logout-btn {
@@ -32,21 +30,27 @@
             background-color: transparent;
             padding-left: 0;
         }
-        .card {
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
+        .folder {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 5px 0;
             cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.3s ease;
         }
-        .card:hover {
-            transform: scale(1.02);
+        .folder:hover {
+            background-color: #e2e6ea;
         }
         .folder-icon {
-            font-size: 2rem;
+            font-size: 1.5rem;
             margin-right: 15px;
             color: #007bff;
         }
         .folder-title {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
         }
         .media img, .media video {
@@ -82,7 +86,7 @@
                 <li class="breadcrumb-item d-none" id="breadcrumb-folder"><a href="#" onclick="goBack()">Photos/Vidéos</a></li>
             </ol>
         </nav>
-        <div id="photos-container" class="row justify-content-center">
+        <div id="photos-container" class="list-group">
             <!-- Les dossiers et fichiers récupérés seront affichés ici -->
         </div>
         <nav aria-label="Page navigation example">
@@ -140,14 +144,11 @@
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const folderDiv = document.createElement('div');
-                    folderDiv.classList.add('col-md-6', 'col-lg-4');
+                    folderDiv.classList.add('list-group-item', 'folder');
+                    folderDiv.setAttribute('onclick', `viewShooting('${doc.id}')`);
                     folderDiv.innerHTML = `
-                        <div class="card" onclick="viewShooting('${doc.id}')">
-                            <div class="card-body">
-                                <i class="fas fa-folder folder-icon"></i>
-                                <div class="folder-title">${data.date} - ${data.shootingType}</div>
-                            </div>
-                        </div>
+                        <i class="fas fa-folder folder-icon"></i>
+                        <div class="folder-title">${data.date} - ${data.shootingType}</div>
                     `;
                     photosContainer.appendChild(folderDiv);
                 });
