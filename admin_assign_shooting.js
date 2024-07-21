@@ -33,10 +33,14 @@ async function checkAdminPermissions(user) {
 }
 
 async function loadClients() {
+    const searchResults = document.getElementById('search-results');
+    if (!searchResults) {
+        console.error("Element with ID 'search-results' not found.");
+        return;
+    }
     const q = query(collection(db, "clients"), orderBy("companyName"));
     const querySnapshot = await getDocs(q);
     
-    const searchResults = document.getElementById('search-results');
     searchResults.innerHTML = '';
 
     querySnapshot.forEach((doc) => {
@@ -56,10 +60,14 @@ async function loadClients() {
 
 window.searchCompany = async function() {
     const companyName = document.getElementById('search-company').value;
+    const searchResults = document.getElementById('search-results');
+    if (!searchResults) {
+        console.error("Element with ID 'search-results' not found.");
+        return;
+    }
     const q = query(collection(db, "clients"), where("companyName", "==", companyName));
     const querySnapshot = await getDocs(q);
     
-    const searchResults = document.getElementById('search-results');
     searchResults.innerHTML = '';
 
     querySnapshot.forEach((doc) => {
