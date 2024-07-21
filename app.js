@@ -147,6 +147,43 @@ window.submitRequest = async function(event) {
         const clientData = docSnap.data();
         let creditsRequired = 0;
         let shootingsRequired = 1;
+        let minDays = 3;
+
+        switch (clientData.subscriptionType) {
+            case 'Démarrage':
+            case 'Standard':
+                minDays = 3;
+                break;
+            case 'Premium':
+            case 'Entreprise':
+                minDays = 2;
+                break;
+            // Ajoutez d'autres cas si nécessaire
+        }
+
+        // Validation des dates
+        const selectedDate = new Date(date);
+        const today = new Date();
+        const maxDate = new Date(today);
+        maxDate.setMonth(today.getMonth() + 1);
+
+        if (selectedDate < today) {
+            alert("Vous ne pouvez pas réserver une date dans le passé.");
+            return;
+        }
+
+        if (selectedDate > maxDate) {
+            alert("Vous ne pouvez pas réserver une date plus de 1 mois à l'avance.");
+            return;
+        }
+
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + minDays);
+
+        if (selectedDate < minDate) {
+            alert(`Vous devez réserver au moins ${minDays} jours à l'avance.`);
+            return;
+        }
 
         switch (specificShooting) {
             case 'Signature':
