@@ -5,7 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Récupérer les Photos</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .folder {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s ease;
+        }
+        .folder:hover {
+            background-color: #e2e6ea;
+        }
+        .folder-icon {
+            font-size: 2rem;
+            margin-right: 10px;
+            color: #007bff;
+        }
+        .folder-title {
+            font-size: 1.2rem;
+        }
+        .media img, .media video {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -114,15 +143,9 @@
                     const photoDiv = document.createElement('div');
                     photoDiv.classList.add('col-md-6', 'col-lg-4', 'mb-4');
                     photoDiv.innerHTML = `
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Type: ${data.shootingType}</h5>
-                                <p class="card-text">Date: ${data.date}</p>
-                                <p class="card-text">Address: ${data.address}</p>
-                                <p class="card-text">City: ${data.city}</p>
-                                <p class="card-text">Additional Info: ${data.additionalInfo}</p>
-                                <button class="btn btn-primary" onclick="viewShooting('${doc.id}')">View Photos/Videos</button>
-                            </div>
+                        <div class="folder" onclick="viewShooting('${doc.id}')">
+                            <i class="fas fa-folder folder-icon"></i>
+                            <div class="folder-title">${data.date} - ${data.shootingType}</div>
                         </div>
                     `;
                     photosContainer.appendChild(photoDiv);
@@ -184,7 +207,7 @@
             listRef.items.forEach(async (itemRef) => {
                 const url = await getDownloadURL(itemRef);
                 const mediaElement = document.createElement('div');
-                mediaElement.classList.add('media');
+                mediaElement.classList.add('media', 'mb-4');
 
                 if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
                     mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}" class="img-fluid">`;
