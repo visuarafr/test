@@ -13,22 +13,20 @@
         }
         .container {
             max-width: 1200px;
-            margin-top: 50px;
+            margin-top: 20px;
         }
         .navbar {
             margin-bottom: 20px;
-            background-color: #007bff;
-            color: #ffffff;
+            background-color: #343a40;
         }
         .navbar-brand, .logout-btn {
-            color: #ffffff;
+            color: #ffffff !important;
         }
         .logout-btn {
             background-color: transparent;
             border: none;
-            color: #ffffff;
+            color: #ffffff !important;
             cursor: pointer;
-            font-size: 0.875rem;
         }
         .breadcrumb {
             background-color: transparent;
@@ -37,9 +35,10 @@
         .card {
             margin-bottom: 20px;
             transition: transform 0.3s ease;
+            cursor: pointer;
         }
         .card:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
         .folder-icon {
             font-size: 2rem;
@@ -64,7 +63,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="#">Photo Shooting</a>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
