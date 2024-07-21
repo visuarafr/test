@@ -1,6 +1,6 @@
 // admin_app.js
 import { auth, db } from './firebase-config.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { setDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
 // Function to check if the user has admin privileges
@@ -29,10 +29,11 @@ window.adminLogin = function() {
             const user = userCredential.user;
             if (await checkAdminPermissions(user)) {
                 console.log("Admin logged in");
-                window.location.replace('create_account.html');
+                window.location.replace('admin_selection.html');
             } else {
                 console.error("You do not have admin permissions.");
                 alert("You do not have admin permissions.");
+                signOut(auth);
             }
         })
         .catch(error => {
@@ -120,3 +121,30 @@ window.signup = async function() {
     }
 }
 
+// Logout function
+window.logout = function() {
+    signOut(auth)
+        .then(() => {
+            window.location.replace('admin_login.html');
+        })
+        .catch((error) => {
+            console.error("Logout error:", error);
+            alert(error.message);
+        });
+}
+
+// Redirect to selection page if admin is already logged in
+document.addEventListener('DOMContentLoaded', (event) => {
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const docRef = doc(db, "admins", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                window.location.replace('admin_selection.html');
+            } else {
+                signOut(auth);
+            }
+        }
+    });
+});
