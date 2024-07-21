@@ -6,7 +6,9 @@ export async function sendToTrello(request, companyName) {
     const listId = '6650d37d314c2a17bbcf7090';
 
     const title = `Shooting ${companyName} ${request.date}`;
-    const description = `Type de Shooting: ${request.shootingType}\nShooting Spécifique: ${request.specificShooting}\nDate: ${request.date}\nAdresse: ${request.address}\nVille: ${request.city}\nInformations supplémentaires: ${request.additionalInfo}`;
+    const description = `Type de Shooting: ${request.shootingType}\nShooting Spécifique: ${request.specificShooting}\nDate: ${request.date}\nHeure: ${request.time}\nAdresse: ${request.address}\nVille: ${request.city}\nInformations supplémentaires: ${request.additionalInfo}`;
+
+    console.log('Trello card details:', title, description);
 
     const url = `https://api.trello.com/1/cards?key=${trelloKey}&token=${trelloToken}&idList=${listId}&name=${encodeURIComponent(title)}&desc=${encodeURIComponent(description)}`;
 
