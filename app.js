@@ -167,6 +167,9 @@ window.submitRequest = async function(event) {
         const maxDate = new Date(today);
         maxDate.setMonth(today.getMonth() + 1);
 
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + minDays);
+
         // Reset hours for date comparison
         selectedDate.setHours(0, 0, 0, 0);
         today.setHours(0, 0, 0, 0);
@@ -181,9 +184,6 @@ window.submitRequest = async function(event) {
             alert("Vous ne pouvez pas réserver une date plus de 1 mois à l'avance.");
             return;
         }
-
-        const minDate = new Date(today);
-        minDate.setDate(today.getDate() + minDays);
 
         if (selectedDate < minDate) {
             alert(`Vous devez réserver au moins ${minDays} jours à l'avance.`);
