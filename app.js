@@ -49,6 +49,7 @@ window.login = function() {
         .then((userCredential) => {
             const user = userCredential.user;
             console.log('User signed in:', user.uid);
+            window.location.replace('dashboard.html'); // Redirect to the dashboard or another page
         })
         .catch((error) => {
             console.error('Error signing in:', error);
