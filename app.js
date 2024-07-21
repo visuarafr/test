@@ -167,6 +167,11 @@ window.submitRequest = async function(event) {
         const maxDate = new Date(today);
         maxDate.setMonth(today.getMonth() + 1);
 
+        // Reset hours for date comparison
+        selectedDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+        minDate.setHours(0, 0, 0, 0);
+
         if (selectedDate < today) {
             alert("Vous ne pouvez pas réserver une date dans le passé.");
             return;
