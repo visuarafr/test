@@ -8,15 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+        }
         .folder {
             display: flex;
             align-items: center;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
             margin: 10px;
             cursor: pointer;
-            background-color: #f8f9fa;
+            background-color: #fff;
             transition: background-color 0.3s ease;
         }
         .folder:hover {
@@ -24,45 +30,50 @@
         }
         .folder-icon {
             font-size: 2rem;
-            margin-right: 10px;
+            margin-right: 15px;
             color: #007bff;
         }
         .folder-title {
             font-size: 1.2rem;
+            font-weight: bold;
         }
         .media img, .media video {
             max-width: 100%;
             height: auto;
+            margin-bottom: 15px;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .media-container {
+            margin-top: 20px;
+        }
+        .breadcrumb {
+            background-color: transparent;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="d-flex justify-content-between align-items-center py-3">
-            <h1>Récupérer les Photos de Shootings</h1>
-            <button class="btn btn-danger" onclick="logout()">Logout</button>
-        </header>
-        <div class="filters mb-4">
-            <div class="form-row">
-                <div class="col">
-                    <input type="date" id="filter-date" class="form-control" placeholder="Filter by Date">
-                </div>
-                <div class="col">
-                    <input type="text" id="filter-type" class="form-control" placeholder="Filter by Shooting Type">
-                </div>
-                <div class="col">
-                    <input type="text" id="filter-location" class="form-control" placeholder="Filter by Location">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
-                </div>
-            </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Photo Shooting</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+                </li>
+            </ul>
         </div>
+    </nav>
+    <div class="container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Shootings</li>
+            <li class="breadcrumb-item d-none" id="breadcrumb-folder"><a href="#" onclick="goBack()">Photos/Vidéos</a></li>
+        </ol>
         <div id="photos-container" class="row">
-            <!-- Les photos récupérées seront affichées ici -->
+            <!-- Les dossiers et fichiers récupérés seront affichés ici -->
         </div>
         <div id="pagination" class="d-flex justify-content-center mt-4">
             <button class="btn btn-primary mr-2" onclick="previousPage()">Previous</button>
@@ -74,25 +85,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
-        import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
-
-        var firebaseConfig = {
-            apiKey: "AIzaSyBKjWfl5lMhM1cftbrPK2ZbkaBOxqYGp7Y",
-            authDomain: "demande-shooting.firebaseapp.com",
-            projectId: "demande-shooting",
-            storageBucket: "demande-shooting.appspot.com",
-            messagingSenderId: "445564757883",
-            appId: "1:445564757883:web:605f43b554324a6e483fde",
-            measurementId: "G-RCRMBS7X79"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        import { auth, db, storage } from './firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
         let currentPage = 1;
         const itemsPerPage = 5;
@@ -115,21 +111,12 @@
             }
         });
 
-        async function loadShootings(user, filters = {}) {
+        async function loadShootings(user) {
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
+            document.getElementById('breadcrumb-folder').classList.add('d-none');
 
             let q = query(collection(db, "requests"), where("userId", "==", user.uid), orderBy("date", "desc"), limit(itemsPerPage));
-
-            if (filters.date) {
-                q = query(q, where("date", "==", filters.date));
-            }
-            if (filters.type) {
-                q = query(q, where("shootingType", "==", filters.type));
-            }
-            if (filters.location) {
-                q = query(q, where("city", "==", filters.location));
-            }
 
             const querySnapshot = await getDocs(q);
 
@@ -140,38 +127,17 @@
                 lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const photoDiv = document.createElement('div');
-                    photoDiv.classList.add('col-md-6', 'col-lg-4', 'mb-4');
-                    photoDiv.innerHTML = `
+                    const folderDiv = document.createElement('div');
+                    folderDiv.classList.add('col-md-6', 'col-lg-4', 'mb-4');
+                    folderDiv.innerHTML = `
                         <div class="folder" onclick="viewShooting('${doc.id}')">
                             <i class="fas fa-folder folder-icon"></i>
                             <div class="folder-title">${data.date} - ${data.shootingType}</div>
                         </div>
                     `;
-                    photosContainer.appendChild(photoDiv);
+                    photosContainer.appendChild(folderDiv);
                 });
             }
-        }
-
-        window.applyFilters = function() {
-            const filters = {
-                date: document.getElementById('filter-date').value,
-                type: document.getElementById('filter-type').value,
-                location: document.getElementById('filter-location').value,
-            };
-
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    loadShootings(user, filters);
-                }
-            });
-        }
-
-        window.clearFilters = function() {
-            document.getElementById('filter-date').value = '';
-            document.getElementById('filter-type').value = '';
-            document.getElementById('filter-location').value = '';
-            applyFilters();
         }
 
         window.previousPage = function() {
@@ -204,6 +170,10 @@
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
 
+            document.getElementById('breadcrumb-folder').classList.remove('d-none');
+            document.querySelector('.breadcrumb-item.active').classList.remove('active');
+            document.getElementById('breadcrumb-folder').classList.add('active');
+
             listRef.items.forEach(async (itemRef) => {
                 const url = await getDownloadURL(itemRef);
                 const mediaElement = document.createElement('div');
@@ -217,6 +187,13 @@
 
                 photosContainer.appendChild(mediaElement);
             });
+        }
+
+        window.goBack = function() {
+            loadShootings(auth.currentUser);
+            document.getElementById('breadcrumb-folder').classList.add('d-none');
+            document.querySelector('.breadcrumb-item.active').classList.remove('active');
+            document.querySelector('.breadcrumb-item:first-child').classList.add('active');
         }
     </script>
 </body>
