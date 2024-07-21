@@ -120,16 +120,21 @@ window.assignShooting = async function() {
 
         const shootingId = newShootingRef.id;
 
+        // Log the storage reference path
+        console.log(`Uploading photos to path: shootings/${selectedClientId}/${shootingId}/`);
+
         // Upload photos
         for (let i = 0; i < shootingPhotos.length; i++) {
             const photo = shootingPhotos[i];
             const storageRef = ref(storage, `shootings/${selectedClientId}/${shootingId}/${photo.name}`);
+            console.log(`Uploading photo: ${photo.name}`);
             await uploadBytes(storageRef, photo);
         }
 
         alert('Shooting assigned successfully.');
     } catch (error) {
         console.error("Error assigning shooting:", error);
+        console.log('Error details:', error);
         alert('Error assigning shooting: ' + error.message);
     }
 }
