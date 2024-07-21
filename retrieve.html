@@ -103,7 +103,6 @@
     <script type="module">
         import { auth, db, storage } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-        import { collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
         import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
         let currentPage = 1;
@@ -127,52 +126,64 @@
             }
         });
 
-        // Fonction pour charger les shootings
         async function loadShootings(user) {
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
             document.getElementById('breadcrumb-folder').classList.add('d-none');
 
-            // Ajout de dossiers de test
-            const testFolders = [
-                { date: '2023-07-21', shootingType: 'Wedding' },
-                { date: '2023-07-20', shootingType: 'Birthday' },
-                { date: '2023-07-19', shootingType: 'Corporate' }
-            ];
+            const storageRef = ref(storage, `shootings/${user.uid}`);
+            const listRef = await listAll(storageRef);
 
-            testFolders.forEach(folder => {
-                const folderDiv = document.createElement('div');
-                folderDiv.classList.add('list-group-item', 'folder');
-                folderDiv.setAttribute('onclick', `viewShooting('test-folder')`);
-                folderDiv.innerHTML = `
-                    <i class="fas fa-folder folder-icon"></i>
-                    <div class="folder-title">${folder.date} - ${folder.shootingType}</div>
-                `;
-                photosContainer.appendChild(folderDiv);
-            });
-
-            // Commentaire pour supprimer les lignes suivantes en production
-            /*let q = query(collection(db, "requests"), where("userId", "==", user.uid), orderBy("date", "desc"), limit(itemsPerPage));
-            
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
+            if (listRef.prefixes.length === 0) {
                 photosContainer.innerHTML = '<p class="no-shootings text-center w-100">No shootings found. Please check back later.</p>';
             } else {
-                firstVisible = querySnapshot.docs[0];
-                lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
+                listRef.prefixes.forEach(folderRef => {
                     const folderDiv = document.createElement('div');
                     folderDiv.classList.add('list-group-item', 'folder');
-                    folderDiv.setAttribute('onclick', `viewShooting('${doc.id}')`);
+                    folderDiv.setAttribute('onclick', `viewShooting('${folderRef.fullPath}')`);
                     folderDiv.innerHTML = `
                         <i class="fas fa-folder folder-icon"></i>
-                        <div class="folder-title">${data.date} - ${data.shootingType}</div>
+                        <div class="folder-title">${folderRef.name}</div>
                     `;
                     photosContainer.appendChild(folderDiv);
                 });
-            }*/
+            }
+        }
+
+        window.viewShooting = async function(folderPath) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const storageRef = ref(storage, folderPath);
+            const listRef = await listAll(storageRef);
+
+            const photosContainer = document.getElementById('photos-container');
+            photosContainer.innerHTML = ''; // Clear previous content
+
+            document.getElementById('breadcrumb-folder').classList.remove('d-none');
+            document.querySelector('.breadcrumb-item.active').classList.remove('active');
+            document.getElementById('breadcrumb-folder').classList.add('active');
+
+            listRef.items.forEach(async (itemRef) => {
+                const url = await getDownloadURL(itemRef);
+                const mediaElement = document.createElement('div');
+                mediaElement.classList.add('media', 'mb-4');
+
+                if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
+                    mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}" class="img-fluid">`;
+                } else if (itemRef.name.endsWith('.mp4')) {
+                    mediaElement.innerHTML = `<video controls src="${url}" class="img-fluid"></video>`;
+                }
+
+                photosContainer.appendChild(mediaElement);
+            });
+        }
+
+        window.goBack = function() {
+            loadShootings(auth.currentUser);
+            document.getElementById('breadcrumb-folder').classList.add('d-none');
+            document.querySelector('.breadcrumb-item.active').classList.remove('active');
+            document.querySelector('.breadcrumb-item:first-child').classList.add('active');
         }
 
         window.previousPage = function() {
@@ -193,63 +204,6 @@
                     loadShootings(user);
                 }
             });
-        }
-
-        window.viewShooting = async function(shootingId) {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const photosContainer = document.getElementById('photos-container');
-            photosContainer.innerHTML = ''; // Clear previous content
-
-            document.getElementById('breadcrumb-folder').classList.remove('d-none');
-            document.querySelector('.breadcrumb-item.active').classList.remove('active');
-            document.getElementById('breadcrumb-folder').classList.add('active');
-
-            // Ajout de fichiers de test
-            const testFiles = [
-                { name: 'photo1.jpg', url: 'https://via.placeholder.com/150' },
-                { name: 'photo2.jpg', url: 'https://via.placeholder.com/150' },
-                { name: 'video1.mp4', url: 'https://via.placeholder.com/150.mp4' }
-            ];
-
-            testFiles.forEach(file => {
-                const mediaElement = document.createElement('div');
-                mediaElement.classList.add('media', 'mb-4');
-
-                if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
-                    mediaElement.innerHTML = `<img src="${file.url}" alt="${file.name}" class="img-fluid">`;
-                } else if (file.name.endsWith('.mp4')) {
-                    mediaElement.innerHTML = `<video controls src="${file.url}" class="img-fluid"></video>`;
-                }
-
-                photosContainer.appendChild(mediaElement);
-            });
-
-            // Commentaire pour supprimer les lignes suivantes en production
-            /*const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
-            const listRef = await listAll(storageRef);
-
-            listRef.items.forEach(async (itemRef) => {
-                const url = await getDownloadURL(itemRef);
-                const mediaElement = document.createElement('div');
-                mediaElement.classList.add('media', 'mb-4');
-
-                if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
-                    mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}" class="img-fluid">`;
-                } else if (itemRef.name.endsWith('.mp4')) {
-                    mediaElement.innerHTML = `<video controls src="${url}" class="img-fluid"></video>`;
-                }
-
-                photosContainer.appendChild(mediaElement);
-            });*/
-        }
-
-        window.goBack = function() {
-            loadShootings(auth.currentUser);
-            document.getElementById('breadcrumb-folder').classList.add('d-none');
-            document.querySelector('.breadcrumb-item.active').classList.remove('active');
-            document.querySelector('.breadcrumb-item:first-child').classList.add('active');
         }
     </script>
 </body>
