@@ -46,6 +46,10 @@
         .result-entry button:hover {
             background-color: #0056b3;
         }
+        .no-results {
+            text-align: center;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -66,10 +70,11 @@
     <div class="container">
         <h1 class="my-4">Assign Shooting</h1>
         <div class="mb-4">
-            <input type="text" id="search-company" class="form-control" placeholder="Search by Company Name" oninput="filterCompanies()">
+            <input type="text" id="search-company" class="form-control" placeholder="Search by Company Name">
+            <button class="btn btn-primary mt-2" onclick="searchCompany()">Search</button>
         </div>
-        <div id="company-list">
-            <!-- La liste des entreprises sera affichée ici -->
+        <div id="search-results">
+            <!-- Les résultats de recherche seront affichés ici -->
         </div>
         <div id="assign-shooting-form" style="display: none;">
             <h2>Assign Shooting</h2>
