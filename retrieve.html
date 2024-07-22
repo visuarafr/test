@@ -119,7 +119,7 @@
     <script type="module">
         import { auth, storage } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-        import { ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+        import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
         let currentPage = 1;
         const itemsPerPage = 5;
@@ -207,56 +207,60 @@
             document.getElementById('breadcrumb-folder').classList.add('d-none');
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.querySelector('.breadcrumb-item:first-child').classList.add('active');
-            document.getElementById('email-all-btn').classList.add('d-none');
         }
 
         window.emailAllFiles = async function() {
             const user = auth.currentUser;
-            if (!user) return;
+            if (!user || !currentFolderPath) return;
 
-            try {
-                const storageRef = ref(storage, currentFolderPath);
-                const listRef = await listAll(storageRef);
-
-                if (listRef.items.length === 0) {
-                    alert('Aucun fichier trouvé dans ce dossier.');
-                    return;
-                }
-
-                const zip = new JSZip();
-
-                for (const itemRef of listRef.items) {
-                    const url = await getDownloadURL(itemRef);
-                    const response = await fetch(url);
-                    const blob = await response.blob();
-                    zip.file(itemRef.name, blob);
-                }
-
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                const zipRef = ref(storage, `shootings/${user.uid}/zips/${currentFolderPath.split('/').pop()}.zip`);
-                await uploadBytes(zipRef, zipBlob);
-
-                const zipUrl = await getDownloadURL(zipRef);
-
-                // Envoyer l'e-mail via EmailJS
-                const templateParams = {
-                    to_email: user.email,
-                    subject: 'Your Shooting Files',
-                    message: 'Here are your shooting files.',
-                    link: zipUrl
-                };
-
-                emailjs.send('service_oes8k5b', 'template_6f8cima', templateParams)
-                    .then((response) => {
-                        alert('E-mail envoyé avec succès.');
-                    }, (error) => {
-                        console.error('Erreur lors de l\'envoi de l\'e-mail:', error);
-                        alert('Erreur lors de l\'envoi de l\'e-mail.');
-                    });
-            } catch (error) {
-                console.error('Erreur lors du téléchargement des fichiers:', error);
-                alert('Erreur lors du téléchargement des fichiers.');
+            const storageRef = ref(storage, currentFolderPath);
+            const listRef = await listAll(storageRef);
+            const zip = new JSZip();
+            
+            for (const itemRef of listRef.items) {
+                const url = await getDownloadURL(itemRef);
+                const response = await fetch(url);
+                const blob = await response.blob();
+                zip.file(itemRef.name, blob);
             }
+
+            const zipBlob = await zip.generateAsync({ type: "blob" });
+            const reader = new FileReader();
+            reader.readAsDataURL(zipBlob);
+            reader.onload = () => {
+                const base64data = reader.result.split(',')[1];
+                emailjs.send('service_oes8k5b', 'template_6f8cima', {
+                    to_email: user.email,
+                    subject: 'Vos fichiers de shooting',
+                    message: 'Voici le lien pour télécharger vos fichiers de shooting :',
+                    link: `data:application/zip;base64,${base64data}`
+                }).then(() => {
+                    alert('Email envoyé avec succès !');
+                }, (error) => {
+                    console.error('Erreur lors de l\'envoi de l\'email :', error);
+                    alert('Erreur lors de l\'envoi de l\'email.');
+                });
+            };
+        }
+
+        window.previousPage = function() {
+            if (currentPage > 1) {
+                currentPage--;
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        loadShootings(user);
+                    }
+                });
+            }
+        }
+
+        window.nextPage = function() {
+            currentPage++;
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    loadShootings(user);
+                }
+            });
         }
     </script>
 </body>
