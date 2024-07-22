@@ -109,8 +109,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://stuk.github.io/jszip/dist/jszip.min.js"></script>
-    <script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
     <script type="module">
         import { auth, storage } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
@@ -209,23 +207,35 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            const storageRef = ref(storage, currentFolderPath);
-            const listRef = await listAll(storageRef);
+            try {
+                const response = await fetch('https://YOUR_CLOUD_FUNCTION_URL', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.uid,
+                        folderPath: currentFolderPath.split('/').pop()
+                    })
+                });
 
-            const zip = new JSZip();
-            const folderName = currentFolderPath.split('/').pop();
-            const zipFolder = zip.folder(folderName);
+                if (!response.ok) {
+                    throw new Error('Failed to generate ZIP file');
+                }
 
-            for (const itemRef of listRef.items) {
-                const url = await getDownloadURL(itemRef);
-                const response = await fetch(url);
                 const blob = await response.blob();
-                zipFolder.file(itemRef.name, blob);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${currentFolderPath.split('/').pop()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading files:', error);
+                alert('Error downloading files: ' + error.message);
             }
-
-            zip.generateAsync({ type: "blob" }).then(function(content) {
-                saveAs(content, `${folderName}.zip`);
-            });
         }
 
         window.previousPage = function() {
