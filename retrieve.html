@@ -97,7 +97,7 @@
         <div id="photos-container" class="list-group">
             <!-- Les dossiers et fichiers récupérés seront affichés ici -->
         </div>
-        <button class="btn btn-primary download-all d-none" id="download-all-btn" onclick="downloadAllFiles()">Télécharger tout</button>
+        <button class="btn btn-primary download-all d-none" id="email-all-btn" onclick="emailAllFiles()">Envoyer par Email</button>
         <nav aria-label="Page navigation example">
             <ul class="pagination">
                 <li class="page-item"><button class="page-link" onclick="previousPage()">Previous</button></li>
@@ -139,7 +139,7 @@
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
             document.getElementById('breadcrumb-folder').classList.add('d-none');
-            document.getElementById('download-all-btn').classList.add('d-none');
+            document.getElementById('email-all-btn').classList.add('d-none');
 
             const storageRef = ref(storage, `shootings/${user.uid}`);
             const listRef = await listAll(storageRef);
@@ -175,7 +175,7 @@
             document.getElementById('breadcrumb-folder').classList.remove('d-none');
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.getElementById('breadcrumb-folder').classList.add('active');
-            document.getElementById('download-all-btn').classList.remove('d-none');
+            document.getElementById('email-all-btn').classList.remove('d-none');
 
             if (listRef.items.length === 0) {
                 photosContainer.innerHTML = '<p class="no-files">Aucun fichier trouvé dans ce dossier.</p>';
@@ -201,39 +201,37 @@
             document.getElementById('breadcrumb-folder').classList.add('d-none');
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.querySelector('.breadcrumb-item:first-child').classList.add('active');
-            document.getElementById('download-all-btn').classList.add('d-none');
+            document.getElementById('email-all-btn').classList.add('d-none');
         }
 
-        window.downloadAllFiles = async function() {
+        window.emailAllFiles = async function() {
             const user = auth.currentUser;
             if (!user) return;
 
+            const email = prompt('Please enter your email address:');
+            if (!email) return;
+
             try {
-                const zip = new JSZip();
-                const folder = zip.folder(currentFolderPath.split('/').pop());
-
-                const storageRef = ref(storage, currentFolderPath);
-                const listRef = await listAll(storageRef);
-
-                const downloadPromises = listRef.items.map(async (itemRef) => {
-                    const url = await getDownloadURL(itemRef);
-                    const response = await fetch(url);
-                    const blob = await response.blob();
-                    folder.file(itemRef.name.split('/').pop(), blob);
+                const response = await fetch('https://your-server-url/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.uid,
+                        folderPath: currentFolderPath.split('/').pop(),
+                        email: email
+                    })
                 });
 
-                await Promise.all(downloadPromises);
-
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(zipBlob);
-                link.download = `${currentFolderPath.split('/').pop()}.zip`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                if (response.ok) {
+                    alert('Email sent successfully');
+                } else {
+                    throw new Error('Error sending email');
+                }
             } catch (error) {
-                console.error('Error downloading files:', error);
-                alert('Error downloading files: ' + error.message);
+                console.error('Error sending email:', error);
+                alert('Error sending email: ' + error.message);
             }
         }
 
