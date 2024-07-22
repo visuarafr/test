@@ -153,28 +153,6 @@
                         <div class="folder-title">${data.shootingType} - ${data.date}</div>
                     `;
                     photosContainer.appendChild(folderDiv);
-
-                    // Lister les fichiers dans Firebase Storage pour ce shooting
-                    const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
-                    const listRef = await listAll(storageRef);
-
-                    if (listRef.items.length === 0) {
-                        folderDiv.innerHTML += '<p class="no-files">Aucun fichier trouvé dans ce dossier.</p>';
-                    } else {
-                        listRef.items.forEach(async (itemRef) => {
-                            const url = await getDownloadURL(itemRef);
-                            const mediaElement = document.createElement('div');
-                            mediaElement.classList.add('media', 'mb-4');
-
-                            if (itemRef.name.endsWith('.jpg') || itemRef.name.endsWith('.png')) {
-                                mediaElement.innerHTML = `<img src="${url}" alt="${itemRef.name}" class="img-fluid">`;
-                            } else if (itemRef.name.endsWith('.mp4')) {
-                                mediaElement.innerHTML = `<video controls src="${url}" class="img-fluid"></video>`;
-                            }
-
-                            folderDiv.appendChild(mediaElement);
-                        });
-                    }
                 }
             }
         }
