@@ -59,6 +59,9 @@
             height: auto;
             margin-bottom: 15px;
         }
+        .download-all {
+            margin: 15px 0;
+        }
         .pagination {
             justify-content: center;
         }
@@ -94,6 +97,7 @@
         <div id="photos-container" class="list-group">
             <!-- Les dossiers et fichiers récupérés seront affichés ici -->
         </div>
+        <button class="btn btn-primary download-all d-none" id="download-all-btn" onclick="downloadAllFiles()">Télécharger tout</button>
         <nav aria-label="Page navigation example">
             <ul class="pagination">
                 <li class="page-item"><button class="page-link" onclick="previousPage()">Previous</button></li>
@@ -105,6 +109,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://stuk.github.io/jszip/dist/jszip.min.js"></script>
+    <script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
     <script type="module">
         import { auth, storage } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
@@ -112,6 +118,7 @@
 
         let currentPage = 1;
         const itemsPerPage = 5;
+        let currentFolderPath = '';
 
         window.logout = function() {
             signOut(auth).then(() => {
@@ -133,6 +140,7 @@
             const photosContainer = document.getElementById('photos-container');
             photosContainer.innerHTML = ''; // Clear previous content
             document.getElementById('breadcrumb-folder').classList.add('d-none');
+            document.getElementById('download-all-btn').classList.add('d-none');
 
             const storageRef = ref(storage, `shootings/${user.uid}`);
             const listRef = await listAll(storageRef);
@@ -157,6 +165,8 @@
             const user = auth.currentUser;
             if (!user) return;
 
+            currentFolderPath = folderPath;
+
             const storageRef = ref(storage, folderPath);
             const listRef = await listAll(storageRef);
 
@@ -166,6 +176,7 @@
             document.getElementById('breadcrumb-folder').classList.remove('d-none');
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.getElementById('breadcrumb-folder').classList.add('active');
+            document.getElementById('download-all-btn').classList.remove('d-none');
 
             if (listRef.items.length === 0) {
                 photosContainer.innerHTML = '<p class="no-files">Aucun fichier trouvé dans ce dossier.</p>';
@@ -191,6 +202,30 @@
             document.getElementById('breadcrumb-folder').classList.add('d-none');
             document.querySelector('.breadcrumb-item.active').classList.remove('active');
             document.querySelector('.breadcrumb-item:first-child').classList.add('active');
+            document.getElementById('download-all-btn').classList.add('d-none');
+        }
+
+        window.downloadAllFiles = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const storageRef = ref(storage, currentFolderPath);
+            const listRef = await listAll(storageRef);
+
+            const zip = new JSZip();
+            const folderName = currentFolderPath.split('/').pop();
+            const zipFolder = zip.folder(folderName);
+
+            for (const itemRef of listRef.items) {
+                const url = await getDownloadURL(itemRef);
+                const response = await fetch(url);
+                const blob = await response.blob();
+                zipFolder.file(itemRef.name, blob);
+            }
+
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+                saveAs(content, `${folderName}.zip`);
+            });
         }
 
         window.previousPage = function() {
