@@ -106,6 +106,12 @@
             </ul>
         </nav>
     </div>
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("S_JZqwh4VhhkKPGcp");
+        })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
@@ -113,7 +119,7 @@
     <script type="module">
         import { auth, storage } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-        import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+        import { ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
         let currentPage = 1;
         const itemsPerPage = 5;
@@ -208,51 +214,49 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            const email = prompt('Please enter your email address:');
-            if (!email) return;
-
             try {
-                const response = await fetch('https://your-server-url/send-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: user.uid,
-                        folderPath: currentFolderPath.split('/').pop(),
-                        email: email
-                    })
-                });
+                const storageRef = ref(storage, currentFolderPath);
+                const listRef = await listAll(storageRef);
 
-                if (response.ok) {
-                    alert('Email sent successfully');
-                } else {
-                    throw new Error('Error sending email');
+                if (listRef.items.length === 0) {
+                    alert('Aucun fichier trouvé dans ce dossier.');
+                    return;
                 }
+
+                const zip = new JSZip();
+
+                for (const itemRef of listRef.items) {
+                    const url = await getDownloadURL(itemRef);
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    zip.file(itemRef.name, blob);
+                }
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const zipRef = ref(storage, `shootings/${user.uid}/zips/${currentFolderPath.split('/').pop()}.zip`);
+                await uploadBytes(zipRef, zipBlob);
+
+                const zipUrl = await getDownloadURL(zipRef);
+
+                // Envoyer l'e-mail via EmailJS
+                const templateParams = {
+                    to_email: user.email,
+                    subject: 'Your Shooting Files',
+                    message: 'Here are your shooting files.',
+                    link: zipUrl
+                };
+
+                emailjs.send('service_oes8k5b', 'template_6f8cima', templateParams)
+                    .then((response) => {
+                        alert('E-mail envoyé avec succès.');
+                    }, (error) => {
+                        console.error('Erreur lors de l\'envoi de l\'e-mail:', error);
+                        alert('Erreur lors de l\'envoi de l\'e-mail.');
+                    });
             } catch (error) {
-                console.error('Error sending email:', error);
-                alert('Error sending email: ' + error.message);
+                console.error('Erreur lors du téléchargement des fichiers:', error);
+                alert('Erreur lors du téléchargement des fichiers.');
             }
-        }
-
-        window.previousPage = function() {
-            if (currentPage > 1) {
-                currentPage--;
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        loadShootings(user);
-                    }
-                });
-            }
-        }
-
-        window.nextPage = function() {
-            currentPage++;
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    loadShootings(user);
-                }
-            });
         }
     </script>
 </body>
