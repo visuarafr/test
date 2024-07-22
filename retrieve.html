@@ -106,8 +106,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script type="module">
-        import { auth, storage } from './firebase-config.js';
+        import { auth, db, storage } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
         import { ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
         let currentPage = 1;
@@ -134,30 +135,32 @@
             photosContainer.innerHTML = ''; // Clear previous content
             document.getElementById('breadcrumb-folder').classList.add('d-none');
 
-            const storageRef = ref(storage, `shootings/${user.uid}`);
-            const listRef = await listAll(storageRef);
+            // Récupérer les métadonnées des shootings depuis Firestore
+            const q = query(collection(db, "requests"), where("userId", "==", user.uid));
+            const querySnapshot = await getDocs(q);
 
-            if (listRef.prefixes.length === 0) {
+            if (querySnapshot.empty) {
                 photosContainer.innerHTML = '<p class="no-shootings">Aucun dossier trouvé. Veuillez vérifier plus tard.</p>';
             } else {
-                listRef.prefixes.forEach(folderRef => {
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
                     const folderDiv = document.createElement('div');
                     folderDiv.classList.add('list-group-item', 'folder');
-                    folderDiv.setAttribute('onclick', `viewShooting('${folderRef.fullPath}')`);
+                    folderDiv.setAttribute('onclick', `viewShooting('${doc.id}')`);
                     folderDiv.innerHTML = `
                         <i class="fas fa-folder folder-icon"></i>
-                        <div class="folder-title">${folderRef.name}</div>
+                        <div class="folder-title">${data.shootingType} - ${data.date}</div>
                     `;
                     photosContainer.appendChild(folderDiv);
                 });
             }
         }
 
-        window.viewShooting = async function(folderPath) {
+        window.viewShooting = async function(shootingId) {
             const user = auth.currentUser;
             if (!user) return;
 
-            const storageRef = ref(storage, folderPath);
+            const storageRef = ref(storage, `shootings/${user.uid}/${shootingId}`);
             const listRef = await listAll(storageRef);
 
             const photosContainer = document.getElementById('photos-container');
